@@ -176,11 +176,19 @@
 .form-group .input {
   padding: 16px 18px;
   font-size: 15px;
-  background-color: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background-color: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 16px;
   color: var(--text-primary);
   transition: all 0.2s ease;
+  appearance: none; /* For custom arrow if needed, but mainly for consistent behavior */
+}
+
+/* Fix for unreadable options in dark theme */
+.form-group select.input option {
+  background-color: #1e293b; /* var(--bg-secondary) solid background */
+  color: var(--text-primary);
+  padding: 12px;
 }
 
 .form-group .input:focus {
