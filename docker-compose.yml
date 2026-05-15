@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mf-billar-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      NODE_ENV: production
+      DB_HOST: host.docker.internal
+      DB_PORT: 5432
+      DB_NAME: mf_billar_db
+      DB_USER: advanced52m
+      DB_PASSWORD: "@Kapobreaking1,"
+    networks:
+      - mf-billar-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mf-billar-frontend
+    restart: unless-stopped
+    ports:
+      - "4201:4200"
+    depends_on:
+      - backend
+    networks:
+      - mf-billar-network
+
+networks:
+  mf-billar-network:
+    driver: bridge
