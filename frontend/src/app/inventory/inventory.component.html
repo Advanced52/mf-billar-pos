@@ -1,0 +1,154 @@
+<div class="inventory-container">
+  <div class="header-actions">
+    <h2><i class="fas fa-warehouse"></i> Gestión de Inventario</h2>
+  </div>
+
+  <div class="grid grid-2 gap-4 inventory-grid">
+    <!-- Panel de Registro -->
+    <div class="card inventory-form">
+      <div class="card-header">
+        <h3><i class="fas fa-truck-loading"></i> Nueva Compra/Abastecimiento</h3>
+      </div>
+      
+      <div class="form-section">
+        <div class="form-group">
+          <label class="label-required">Producto</label>
+          <select class="input input-large" [(ngModel)]="formData.product_id">
+            <option value="">-- Seleccione un producto --</option>
+            <option *ngFor="let p of products" [value]="p.id">{{ p.name }}</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="label-required">Cantidad (Unidades/Cajas)</label>
+          <input type="number" class="input input-large" [(ngModel)]="formData.quantity" min="1" placeholder="0">
+        </div>
+
+        <div class="grid grid-2 gap-2">
+          <div class="form-group">
+            <label class="label-required">Precio Compra ($)</label>
+            <input type="number" class="input input-large" [(ngModel)]="formData.purchase_price" min="0" step="0.01" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label class="label-required">Precio Venta ($)</label>
+            <input type="number" class="input input-large" [(ngModel)]="formData.sale_price" min="0" step="0.01" placeholder="0.00">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Observaciones (Opcional)</label>
+          <input type="text" class="input input-large" placeholder="Ej. Lote #15, Vencimiento: 12/2024..." [(ngModel)]="formData.observation">
+        </div>
+        
+        <button class="btn btn-primary btn-xl w-100 mt-4" (click)="registerSupply()" [disabled]="!formData.product_id || formData.quantity < 1">
+          <i class="fas fa-cart-plus"></i> INGRESAR AL INVENTARIO
+        </button>
+      </div>
+    </div>
+    
+    <!-- Panel de Historial -->
+    <div class="card inventory-history">
+      <div class="card-header">
+        <h3><i class="fas fa-history"></i> Historial de Ingresos</h3>
+      </div>
+      
+      <div class="table-container" *ngIf="inventoryHistory.length > 0; else noInventory">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>C. Compra</th>
+              <th>C. Venta</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let entry of inventoryHistory">
+              <td class="text-center">{{ entry.date | date:'dd/MM' }}</td>
+              <td>
+                <div class="product-name">
+                  <i class="fas fa-box"></i> {{ entry.product_name }}
+                </div>
+              </td>
+              <td class="text-center">
+                <span class="badge badge-success">+{{ entry.quantity }}</span>
+              </td>
+              <td class="text-right">${{ entry.purchase_price | number:'1.2-2' }}</td>
+              <td class="text-right"><strong>${{ entry.sale_price | number:'1.2-2' }}</strong></td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-secondary btn-icon-sm" (click)="openEditModal(entry)" title="Editar">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger btn-icon-sm" (click)="deleteEntry(entry.id)" title="Eliminar">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <ng-template #noInventory>
+        <div class="no-data">
+          <i class="fas fa-inbox"></i>
+          <p>Sin ingresos registrados</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Edición -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2><i class="fas fa-edit"></i> Editar Ingreso</h2>
+      <button class="modal-close" (click)="closeModal()" aria-label="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="form-section">
+      <div class="form-group">
+        <label class="label-required">Producto</label>
+        <select class="input input-large" [(ngModel)]="editFormData.product_id">
+          <option *ngFor="let p of products" [value]="p.id">{{ p.name }}</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="label-required">Cantidad Ingresada</label>
+        <input type="number" class="input input-large" [(ngModel)]="editFormData.quantity" min="1">
+      </div>
+
+      <div class="grid grid-2 gap-2">
+        <div class="form-group">
+          <label class="label-required">Precio Compra ($)</label>
+          <input type="number" class="input input-large" [(ngModel)]="editFormData.purchase_price" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label class="label-required">Precio Venta ($)</label>
+          <input type="number" class="input input-large" [(ngModel)]="editFormData.sale_price" min="0" step="0.01">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Observaciones (Opcional)</label>
+        <input type="text" class="input input-large" [(ngModel)]="editFormData.observation">
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-large" (click)="closeModal()">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button class="btn btn-primary btn-large" (click)="updateEntry()">
+          <i class="fas fa-save"></i> Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

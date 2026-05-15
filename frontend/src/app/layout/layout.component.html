@@ -1,0 +1,33 @@
+<div class="layout-container">
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="fas fa-billiard-ball"></i> Billar MFF
+    </div>
+    <nav class="nav-menu">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+        <i class="fas fa-home"></i> Dashboard
+      </a>
+      <a routerLink="/sales" routerLinkActive="active" class="nav-item">
+        <i class="fas fa-cash-register"></i> Ventas
+      </a>
+      <a routerLink="/products" routerLinkActive="active" class="nav-item">
+        <i class="fas fa-box"></i> Productos
+      </a>
+      <a routerLink="/inventory" routerLinkActive="active" class="nav-item">
+        <i class="fas fa-warehouse"></i> Inventario
+      </a>
+      <a routerLink="/expenses" routerLinkActive="active" class="nav-item">
+        <i class="fas fa-file-invoice-dollar"></i> Gastos
+      </a>
+    </nav>
+  </aside>
+  <main class="main-content">
+    <header class="topbar">
+      <h2>Panel de Control</h2>
+
+    </header>
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

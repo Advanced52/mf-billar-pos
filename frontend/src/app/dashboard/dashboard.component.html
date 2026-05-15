@@ -1,0 +1,77 @@
+<div *ngIf="data" class="dashboard">
+  <h2><i class="fas fa-chart-line"></i> Resumen del Día</h2>
+  
+  <div class="grid grid-4 kpi-grid">
+    <div class="card kpi-card">
+      <div class="kpi-icon"><i class="fas fa-shopping-cart"></i></div>
+      <div class="kpi-info">
+        <h3>Ventas</h3>
+        <p class="kpi-value">${{ data.todaySales | number:'1.2-2' }}</p>
+      </div>
+    </div>
+    
+    <div class="card kpi-card">
+      <div class="kpi-icon danger"><i class="fas fa-arrow-down"></i></div>
+      <div class="kpi-info">
+        <h3>Gastos</h3>
+        <p class="kpi-value">${{ data.todayExpenses | number:'1.2-2' }}</p>
+      </div>
+    </div>
+    
+    <div class="card kpi-card">
+      <div class="kpi-icon success"><i class="fas fa-chart-line"></i></div>
+      <div class="kpi-info">
+        <h3>Ganancia Bruta</h3>
+        <p class="kpi-value">${{ data.todayProfit | number:'1.2-2' }}</p>
+      </div>
+    </div>
+    
+    <div class="card kpi-card">
+      <div class="kpi-icon primary"><i class="fas fa-wallet"></i></div>
+      <div class="kpi-info">
+        <h3>Ganancia Neta</h3>
+        <p class="kpi-value">${{ data.netProfit | number:'1.2-2' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-2 main-dashboard-grid">
+    <div class="card h-100">
+      <h3><i class="fas fa-chart-bar"></i> Ventas - Últimos 7 Días</h3>
+      <div class="chart-container">
+        <div class="simple-bar-chart" *ngIf="data.charts?.length > 0; else noChart">
+          <div class="bar" *ngFor="let c of data.charts" [title]="c.daily_total">
+            <div class="bar-fill" [style.height.%]="(c.daily_total / maxChartValue) * 100"></div>
+            <span class="bar-label">{{ c.day | date:'dd/MM' }}</span>
+          </div>
+        </div>
+        <ng-template #noChart>
+          <div class="no-data"><i class="fas fa-inbox"></i> Sin datos para mostrar</div>
+        </ng-template>
+      </div>
+    </div>
+    
+    <div class="card h-100">
+      <h3><i class="fas fa-exclamation-triangle"></i> Productos con Bajo Stock</h3>
+      <div *ngIf="data.lowStock?.length === 0" class="no-data">
+        <i class="fas fa-check-circle"></i> Todo el stock está en niveles óptimos
+      </div>
+      <div class="table-container" *ngIf="data.lowStock?.length > 0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Stock Actual</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of data.lowStock">
+              <td>{{ p.name }}</td>
+              <td><strong class="danger-text">{{ p.stock }} unid.</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

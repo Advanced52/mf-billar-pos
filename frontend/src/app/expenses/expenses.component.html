@@ -1,0 +1,113 @@
+<div class="expenses-container">
+  <div class="header-actions">
+    <h2><i class="fas fa-file-invoice-dollar"></i> Gestión de Gastos</h2>
+  </div>
+
+  <div class="grid grid-2 gap-4">
+    <!-- Registro de Gasto -->
+    <div class="card expense-form">
+      <div class="card-header">
+        <h3><i class="fas fa-plus-circle"></i> Nuevo Gasto</h3>
+      </div>
+      
+      <div class="form-section">
+        <div class="form-group">
+          <label class="label-required">Descripción</label>
+          <input type="text" class="input input-large" placeholder="Ej. Luz, Reparación, Suministros..." [(ngModel)]="formData.description">
+        </div>
+        
+        <div class="form-group">
+          <label class="label-required">Monto ($)</label>
+          <input type="number" class="input input-large" [(ngModel)]="formData.value" min="0" placeholder="0.00">
+        </div>
+        
+        <button class="btn btn-danger btn-xl w-100 mt-4" (click)="registerExpense()" [disabled]="!formData.description || formData.value <= 0">
+          <i class="fas fa-plus-circle"></i> REGISTRAR GASTO
+        </button>
+      </div>
+    </div>
+    
+    <!-- Historial de Gastos -->
+    <div class="card expenses-history">
+      <div class="card-header">
+        <h3><i class="fas fa-history"></i> Historial de Gastos</h3>
+      </div>
+      
+      <div class="table-container" *ngIf="expenses.length > 0; else noExpenses">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Descripción</th>
+              <th>Monto</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of expenses">
+              <td>
+                <div class="expense-description">
+                  <i class="fas fa-tag"></i> {{ e.description }}
+                </div>
+              </td>
+              <td class="danger-text">
+                <strong>-${{ e.value | number:'1.2-2' }}</strong>
+              </td>
+              <td class="text-center">{{ e.date | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-secondary btn-icon-sm" (click)="openEditModal(e)" title="Editar">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger btn-icon-sm" (click)="deleteExpense(e.id)" title="Eliminar">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <ng-template #noExpenses>
+        <div class="no-data">
+          <i class="fas fa-inbox"></i>
+          <p>Sin gastos registrados</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Edición -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2><i class="fas fa-edit"></i> Editar Gasto</h2>
+      <button class="modal-close" (click)="closeModal()" aria-label="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="form-section">
+      <div class="form-group">
+        <label class="label-required">Descripción</label>
+        <input type="text" class="input input-large" [(ngModel)]="editFormData.description">
+      </div>
+      
+      <div class="form-group">
+        <label class="label-required">Monto ($)</label>
+        <input type="number" class="input input-large" [(ngModel)]="editFormData.value" min="0">
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-large" (click)="closeModal()">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button class="btn btn-primary btn-large" (click)="updateExpense()">
+          <i class="fas fa-save"></i> Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

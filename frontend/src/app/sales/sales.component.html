@@ -1,0 +1,175 @@
+<div class="sales-container">
+  <div class="header-actions">
+    <h2><i class="fas fa-cash-register"></i> Punto de Venta</h2>
+    <p class="subtitle">Diseño rápido, táctil y orientado a cerrar ventas en segundos.</p>
+  </div>
+
+  <div class="sales-grid">
+    <!-- Panel de Registro de Venta -->
+    <div class="card new-sale-card">
+      <div class="card-header">
+        <div>
+          <h3><i class="fas fa-bolt"></i> Venta Instantánea</h3>
+          <p class="small-text">Selecciona rápido y confirma con un solo toque.</p>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="quick-products">
+          <div class="section-title">Productos frecuentes</div>
+          <div class="quick-grid">
+            <button type="button" *ngFor="let p of products | slice:0:6"
+              class="quick-card" 
+              [class.selected]="formData.product_id == p.id"
+              (click)="formData.product_id = p.id; formData.quantity = 1;">
+              <div class="quick-icon">{{ getProductIcon(p.name) }}</div>
+              <div class="quick-text">
+                <span class="quick-name">{{ p.name }}</span>
+                <span class="quick-price">${{ p.sale_price | number:'1.2-2' }}</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-2 gap-3 product-row">
+          <div class="form-group full-width">
+            <label class="label-required">Producto</label>
+            <select class="input input-large" [(ngModel)]="formData.product_id">
+              <option value="">-- Seleccione un producto --</option>
+              <option *ngFor="let p of products" [value]="p.id">{{ p.name }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="label-required">Cantidad</label>
+            <input type="number" class="input input-large" [(ngModel)]="formData.quantity" min="1" placeholder="1">
+          </div>
+        </div>
+
+        <div class="product-info" *ngIf="getSelectedProduct() as selected">
+          <span class="info-chip">Stock: {{ selected.stock }}</span>
+          <span class="info-chip">Precio unitario: ${{ selected.sale_price | number:'1.2-2' }}</span>
+          <span class="info-chip">Ganancia estimada: ${{ (selected.sale_price - selected.purchase_price) | number:'1.2-2' }}</span>
+        </div>
+
+        <div class="payment-toggle">
+          <button type="button" class="toggle-btn" [class.active]="formData.payment_method === 'Efectivo'" (click)="formData.payment_method = 'Efectivo'">
+            <span>💵</span>
+            Efectivo
+          </button>
+          <button type="button" class="toggle-btn" [class.active]="formData.payment_method === 'Tarjeta'" (click)="formData.payment_method = 'Tarjeta'">
+            <span>🏦</span>
+            Transferencia
+          </button>
+        </div>
+
+        <div class="total-box">
+          <div class="total-highlight">TOTAL</div>
+          <div class="total-number" [class.animate]="getTotal()">
+            ${{ getTotal() | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-xxl w-100 confirm-button" (click)="registerSale()" [disabled]="!formData.product_id">
+          <i class="fas fa-check-circle"></i>
+          CONFIRMAR VENTA
+        </button>
+      </div>
+    </div>
+
+    <!-- Panel de Historial -->
+    <div class="card sales-history">
+      <div class="card-header">
+        <div>
+          <h3><i class="fas fa-history"></i> Últimas ventas</h3>
+          <p class="small-text">Historial rápido con métodos de pago y totales claros.</p>
+        </div>
+      </div>
+
+      <div class="history-scroll" *ngIf="sales.length > 0; else noSales">
+        <div class="sale-entry" *ngFor="let s of sales">
+          <div class="sale-card">
+            <div class="sale-left">
+              <div class="sale-icon">{{ getProductIcon(s.product_name) }}</div>
+              <div>
+                <div class="sale-title">{{ s.product_name }}</div>
+                <div class="sale-subtitle">x{{ s.quantity }} · {{ s.date | date:'HH:mm' }}</div>
+              </div>
+            </div>
+            <div class="sale-right">
+              <div class="sale-total">${{ s.total }}</div>
+              <span class="badge" [ngClass]="s.payment_method === 'Efectivo' ? 'badge-success' : 'badge-info'">
+                {{ getPaymentIcon(s.payment_method) }} {{ s.payment_method }}
+              </span>
+            </div>
+          </div>
+          <div class="sale-actions">
+            <button class="btn btn-sm btn-secondary btn-icon-sm" (click)="openEditModal(s)" title="Editar">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-danger btn-icon-sm" (click)="deleteSale(s.id)" title="Eliminar">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noSales>
+        <div class="no-data">
+          <i class="fas fa-inbox"></i>
+          <p>No hay ventas registradas aún</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Edición -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2><i class="fas fa-edit"></i> Editar Venta</h2>
+      <button class="modal-close" (click)="closeModal()" aria-label="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="form-section">
+      <div class="form-group">
+        <label class="label-required">Producto</label>
+        <select class="input input-large" [(ngModel)]="editFormData.product_id">
+          <option *ngFor="let p of products" [value]="p.id">{{ p.name }} (Stock: {{p.stock}})</option>
+        </select>
+      </div>
+      
+      <div class="grid grid-2 gap-2">
+        <div class="form-group">
+          <label class="label-required">Cantidad</label>
+          <input type="number" class="input input-large" [(ngModel)]="editFormData.quantity" min="1">
+        </div>
+        
+        <div class="form-group">
+          <label class="label-required">Método de Pago</label>
+          <select class="input input-large" [(ngModel)]="editFormData.payment_method">
+            <option value="Efectivo">Efectivo</option>
+            <option value="Tarjeta">Tarjeta / Transferencia</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="total-preview mt-4">
+        <div class="total-label">Total a Pagar:</div>
+        <div class="total-amount">${{ getTotal(true) | number:'1.2-2' }}</div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-large" (click)="closeModal()">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button class="btn btn-primary btn-large" (click)="updateSale()">
+          <i class="fas fa-save"></i> Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

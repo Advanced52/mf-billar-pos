@@ -1,0 +1,119 @@
+<div class="products-container">
+  <div class="header-actions">
+    <h2><i class="fas fa-box"></i> Catálogo de Productos</h2>
+    <button class="btn btn-primary btn-large" (click)="openModal()">
+      <i class="fas fa-plus-circle"></i> Nuevo Producto
+    </button>
+  </div>
+
+  <div class="card mt-4">
+    <div class="products-view">
+      <!-- Vista de Tabla -->
+      <div class="table-container" *ngIf="products.length > 0; else noProducts">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Categoría</th>
+              <th>Precio Compra</th>
+              <th>Precio Venta</th>
+              <th>Stock</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of products">
+              <td>
+                <div class="product-name">
+                  <i class="fas fa-cube"></i> {{ p.name }}
+                </div>
+              </td>
+              <td>
+                <span class="badge badge-primary">{{ p.category || 'General' }}</span>
+              </td>
+              <td class="text-right">${{ p.purchase_price | number:'1.2-2' }}</td>
+              <td class="text-right"><strong>${{ p.sale_price | number:'1.2-2' }}</strong></td>
+              <td class="text-center">
+                <span [ngClass]="{'danger-text': p.stock < 5, 'success-text': p.stock >= 20}">
+                  <strong>{{ p.stock }}</strong> {{ p.stock < 5 ? '⚠️' : '' }}
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="badge" [ngClass]="p.stock > 0 ? 'badge-success' : 'badge-danger'">
+                  {{ p.stock > 0 ? '✓ Activo' : '✗ Sin stock' }}
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-sm btn-secondary btn-icon-sm" (click)="openModal(p)" title="Editar">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger btn-icon-sm" (click)="deleteProduct(p.id)" title="Eliminar">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <ng-template #noProducts>
+        <div class="no-data">
+          <i class="fas fa-box-open"></i>
+          <p>Sin productos registrados</p>
+          <p class="small">Crear el primer producto para comenzar</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Producto -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>
+        <i [class]="editingProduct ? 'fas fa-edit' : 'fas fa-plus-circle'"></i>
+        {{ editingProduct ? 'Editar Producto' : 'Nuevo Producto' }}
+      </h2>
+      <button class="modal-close" (click)="closeModal()" aria-label="Cerrar">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="form-section">
+      <div class="form-group">
+        <label class="label-required">Nombre del Producto</label>
+        <input type="text" class="input input-large" placeholder="Ej: Cerveza Pilsen" [(ngModel)]="formData.name">
+      </div>
+      
+      <div class="form-group">
+        <label class="label-required">Categoría</label>
+        <input type="text" class="input input-large" placeholder="Ej: Bebida, Snack, Licor" [(ngModel)]="formData.category">
+      </div>
+      
+      <div class="grid grid-2 gap-2">
+        <div class="form-group">
+          <label class="label-required">Precio Compra ($)</label>
+          <input type="number" class="input input-large" [(ngModel)]="formData.purchase_price" min="0" step="0.01">
+        </div>
+        
+        <div class="form-group">
+          <label class="label-required">Precio Venta ($)</label>
+          <input type="number" class="input input-large" [(ngModel)]="formData.sale_price" min="0" step="0.01">
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-large" (click)="closeModal()">
+          <i class="fas fa-times"></i> Cancelar
+        </button>
+        <button class="btn btn-primary btn-large" (click)="saveProduct()">
+          <i class="fas fa-save"></i> Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

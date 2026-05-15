@@ -1,0 +1,372 @@
+const express = require('express');
+const cors = require('cors');
+const db = require('./db');
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(cors());
+app.use(express.json());
+
+// ========================
+// PRODUCTS
+// ========================
+app.get('/api/products', async (req, res) => {
+  try {
+    const query = `
+      SELECT p.id, p.name, p.category, p.stock,
+      (SELECT sale_price FROM inventory_entries e WHERE e.product_id = p.id ORDER BY date DESC LIMIT 1) as sale_price
+      FROM products p
+      ORDER BY p.name ASC
+    `;
+    const { rows } = await db.query(query);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/products', async (req, res) => {
+  const { name, category, stock } = req.body;
+  try {
+    const { rows } = await db.query(
+      'INSERT INTO products (name, category, stock) VALUES ($1, $2, $3) RETURNING *',
+      [name, category || 'General', stock || 0]
+    );
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/products/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, category, stock } = req.body;
+  try {
+    const { rows } = await db.query(
+      'UPDATE products SET name = $1, category = $2, stock = $3 WHERE id = $4 RETURNING *',
+      [name, category || 'General', stock, id]
+    );
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/products/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await db.query('DELETE FROM products WHERE id = $1', [id]);
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ========================
+// INVENTORY ENTRIES
+// ========================
+app.get('/api/inventory', async (req, res) => {
+  try {
+    const query = `
+      SELECT i.*, p.name as product_name
+      FROM inventory_entries i
+      JOIN products p ON i.product_id = p.id
+      ORDER BY i.date DESC
+    `;
+    const { rows } = await db.query(query);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/inventory', async (req, res) => {
+  const { product_id, quantity, purchase_price, sale_price, observation } = req.body;
+  try {
+    await db.query('BEGIN');
+    
+    // Insert entry
+    const { rows } = await db.query(
+      'INSERT INTO inventory_entries (product_id, quantity, purchase_price, sale_price, observation) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [product_id, quantity, purchase_price, sale_price, observation]
+    );
+    
+    // Update stock
+    await db.query('UPDATE products SET stock = stock + $1 WHERE id = $2', [quantity, product_id]);
+    
+    await db.query('COMMIT');
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    await db.query('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/inventory/:id', async (req, res) => {
+  const { id } = req.params;
+  const { product_id, quantity, purchase_price, sale_price, observation } = req.body;
+  try {
+    await db.query('BEGIN');
+    
+    // Get current entry
+    const currentEntryRes = await db.query('SELECT * FROM inventory_entries WHERE id = $1', [id]);
+    if (currentEntryRes.rows.length === 0) throw new Error('Ingreso no encontrado');
+    const oldEntry = currentEntryRes.rows[0];
+    const oldQuantity = oldEntry.quantity;
+    const oldProductId = oldEntry.product_id;
+    
+    // Update entry
+    const { rows } = await db.query(
+      'UPDATE inventory_entries SET product_id = $1, quantity = $2, purchase_price = $3, sale_price = $4, observation = $5 WHERE id = $6 RETURNING *',
+      [product_id, quantity, purchase_price, sale_price, observation, id]
+    );
+    
+    // Update stock
+    if (oldProductId != product_id) {
+       await db.query('UPDATE products SET stock = stock - $1 WHERE id = $2', [oldQuantity, oldProductId]);
+       await db.query('UPDATE products SET stock = stock + $1 WHERE id = $2', [quantity, product_id]);
+    } else {
+       const diff = quantity - oldQuantity;
+       if (diff !== 0) {
+         await db.query('UPDATE products SET stock = stock + $1 WHERE id = $2', [diff, product_id]);
+       }
+    }
+    
+    await db.query('COMMIT');
+    res.json(rows[0] || {});
+  } catch (err) {
+    await db.query('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/inventory/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await db.query('BEGIN');
+    const currentEntryRes = await db.query('SELECT * FROM inventory_entries WHERE id = $1', [id]);
+    if (currentEntryRes.rows.length > 0) {
+      const entry = currentEntryRes.rows[0];
+      await db.query('UPDATE products SET stock = stock - $1 WHERE id = $2', [entry.quantity, entry.product_id]);
+      await db.query('DELETE FROM inventory_entries WHERE id = $1', [id]);
+    }
+    await db.query('COMMIT');
+    res.status(204).send();
+  } catch (err) {
+    await db.query('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ========================
+// SALES
+// ========================
+app.get('/api/sales', async (req, res) => {
+  try {
+    const query = `
+      SELECT s.*, p.name as product_name
+      FROM sales s
+      LEFT JOIN products p ON s.product_id = p.id
+      ORDER BY s.date DESC
+    `;
+    const { rows } = await db.query(query);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/sales', async (req, res) => {
+  const { product_id, quantity, payment_method } = req.body;
+  try {
+    await db.query('BEGIN');
+    
+    // Check product stock
+    const prodRes = await db.query('SELECT * FROM products WHERE id = $1', [product_id]);
+    if (prodRes.rows.length === 0) throw new Error('Producto no encontrado');
+    const product = prodRes.rows[0];
+    
+    if (product.stock < quantity) throw new Error('No hay suficiente stock');
+    
+    // Get latest prices from inventory
+    const invRes = await db.query('SELECT purchase_price, sale_price FROM inventory_entries WHERE product_id = $1 ORDER BY date DESC LIMIT 1', [product_id]);
+    if (invRes.rows.length === 0) throw new Error('No existe historial de compras para obtener un precio definido');
+    
+    const pr = invRes.rows[0];
+    const total = pr.sale_price * quantity;
+    const profit = (pr.sale_price - pr.purchase_price) * quantity;
+    
+    // Insert sale
+    const { rows } = await db.query(
+      'INSERT INTO sales (product_id, quantity, payment_method, total, profit) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [product_id, quantity, payment_method, total, profit]
+    );
+    
+    // Update stock
+    await db.query('UPDATE products SET stock = stock - $1 WHERE id = $2', [quantity, product_id]);
+    
+    await db.query('COMMIT');
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    await db.query('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/sales/:id', async (req, res) => {
+  const { id } = req.params;
+  const { product_id, quantity, payment_method } = req.body;
+  try {
+    await db.query('BEGIN');
+    
+    // Get current sale
+    const currentSaleRes = await db.query('SELECT * FROM sales WHERE id = $1', [id]);
+    if (currentSaleRes.rows.length === 0) throw new Error('Venta no encontrada');
+    const oldSale = currentSaleRes.rows[0];
+    
+    // Revert old stock
+    await db.query('UPDATE products SET stock = stock + $1 WHERE id = $2', [oldSale.quantity, oldSale.product_id]);
+    
+    // Check new stock
+    const prodRes = await db.query('SELECT * FROM products WHERE id = $1', [product_id]);
+    if (prodRes.rows.length === 0) throw new Error('Producto no encontrado');
+    const product = prodRes.rows[0];
+    
+    if (product.stock < quantity) throw new Error('No hay suficiente stock');
+    
+    // Get latest prices from inventory
+    const invRes = await db.query('SELECT purchase_price, sale_price FROM inventory_entries WHERE product_id = $1 ORDER BY date DESC LIMIT 1', [product_id]);
+    if (invRes.rows.length === 0) throw new Error('No existe historial de compras para obtener un precio definido');
+    
+    const pr = invRes.rows[0];
+    const total = pr.sale_price * quantity;
+    const profit = (pr.sale_price - pr.purchase_price) * quantity;
+    
+    // Update sale
+    const { rows } = await db.query(
+      'UPDATE sales SET product_id = $1, quantity = $2, payment_method = $3, total = $4, profit = $5 WHERE id = $6 RETURNING *',
+      [product_id, quantity, payment_method, total, profit, id]
+    );
+    
+    // Apply new stock
+    await db.query('UPDATE products SET stock = stock - $1 WHERE id = $2', [quantity, product_id]);
+    
+    await db.query('COMMIT');
+    res.json(rows[0]);
+  } catch (err) {
+    await db.query('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/sales/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await db.query('BEGIN');
+    const currentSaleRes = await db.query('SELECT * FROM sales WHERE id = $1', [id]);
+    if (currentSaleRes.rows.length > 0) {
+      const sale = currentSaleRes.rows[0];
+      await db.query('UPDATE products SET stock = stock + $1 WHERE id = $2', [sale.quantity, sale.product_id]);
+      await db.query('DELETE FROM sales WHERE id = $1', [id]);
+    }
+    await db.query('COMMIT');
+    res.status(204).send();
+  } catch (err) {
+    await db.query('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ========================
+// EXPENSES
+// ========================
+app.get('/api/expenses', async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT * FROM expenses ORDER BY date DESC');
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/expenses', async (req, res) => {
+  const { description, value } = req.body;
+  try {
+    const { rows } = await db.query(
+      'INSERT INTO expenses (description, value) VALUES ($1, $2) RETURNING *',
+      [description, value]
+    );
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/expenses/:id', async (req, res) => {
+  const { id } = req.params;
+  const { description, value } = req.body;
+  try {
+    const { rows } = await db.query(
+      'UPDATE expenses SET description = $1, value = $2 WHERE id = $3 RETURNING *',
+      [description, value, id]
+    );
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/expenses/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await db.query('DELETE FROM expenses WHERE id = $1', [id]);
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ========================
+// DASHBOARD
+// ========================
+app.get('/api/dashboard', async (req, res) => {
+  try {
+    // Sales today
+    const salesRes = await db.query(
+      'SELECT COALESCE(SUM(total), 0) as total_sales, COALESCE(SUM(profit), 0) as total_profit FROM sales WHERE date >= CURRENT_DATE'
+    );
+    
+    // Expenses today
+    const expensesRes = await db.query(
+      'SELECT COALESCE(SUM(value), 0) as total_expenses FROM expenses WHERE date >= CURRENT_DATE'
+    );
+
+    // Low stock
+    const lowStockRes = await db.query('SELECT * FROM products WHERE stock < 5 ORDER BY stock ASC LIMIT 10');
+
+    // Simple charts: Last 7 days sales
+    const chartsRes = await db.query(`
+      SELECT DATE(date) as day, SUM(total) as daily_total
+      FROM sales
+      WHERE date >= CURRENT_DATE - INTERVAL '7 days'
+      GROUP BY DATE(date)
+      ORDER BY DATE(date) ASC
+    `);
+
+    res.json({
+      todaySales: parseFloat(salesRes.rows[0].total_sales),
+      todayProfit: parseFloat(salesRes.rows[0].total_profit),
+      todayExpenses: parseFloat(expensesRes.rows[0].total_expenses),
+      netProfit: parseFloat(salesRes.rows[0].total_profit) - parseFloat(expensesRes.rows[0].total_expenses),
+      lowStock: lowStockRes.rows,
+      charts: chartsRes.rows,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Backend listening on port ${port}`);
+});
