@@ -12,16 +12,13 @@ services:
       - "3001:3000"
     environment:
       NODE_ENV: production
-      DB_HOST: host.docker.internal
+      DB_HOST: postgres_laravel
       DB_PORT: 5432
       DB_NAME: mf_billar_db
       DB_USER: advanced52m
       DB_PASSWORD: "@Kapobreaking1,"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
     networks:
-      - mf-billar-network
+      - postgres_default
 
   frontend:
     build:
@@ -34,8 +31,8 @@ services:
     depends_on:
       - backend
     networks:
-      - mf-billar-network
+      - postgres_default
 
 networks:
-  mf-billar-network:
-    driver: bridge
+  postgres_default:
+    external: true
