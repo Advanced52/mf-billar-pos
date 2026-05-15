@@ -30,6 +30,8 @@ services:
       - "4201:4200"
     depends_on:
       - backend
+    environment:
+      DOCKER_ENV: "true"
     networks:
       - postgres_default
 
