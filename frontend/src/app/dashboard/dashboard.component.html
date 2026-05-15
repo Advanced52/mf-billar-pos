@@ -48,7 +48,10 @@
         <div class="kpi-info">
           <h3>Gastos hoy</h3>
           <p class="kpi-value money">${{ data.todayExpenses | number:'1.2-2' }}</p>
-          <p class="kpi-sub">Egresos registrados</p>
+          <p class="kpi-sub" *ngIf="data.pendingFiadosCount > 0">
+            + ${{ data.pendingFiados | number:'1.2-2' }} en fiados ({{ data.pendingFiadosCount }})
+          </p>
+          <p class="kpi-sub" *ngIf="!data.pendingFiadosCount">Egresos en efectivo</p>
         </div>
       </div>
 

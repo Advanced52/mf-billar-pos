@@ -70,4 +70,18 @@ export class ApiService {
   deleteExpense(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/expenses/${id}`);
   }
+
+  // Fiados (crédito)
+  getFiados(status = 'pending'): Observable<any> {
+    return this.http.get(`${this.apiUrl}/fiados`, { params: { status } });
+  }
+  createFiado(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/fiados`, data);
+  }
+  settleFiado(id: number, payment_method = 'Efectivo'): Observable<any> {
+    return this.http.post(`${this.apiUrl}/fiados/${id}/settle`, { payment_method });
+  }
+  deleteFiado(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/fiados/${id}`);
+  }
 }

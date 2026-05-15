@@ -328,6 +328,130 @@ app.delete('/api/expenses/:id', async (req, res) => {
 });
 
 // ========================
+// FIADOS (crédito temporal → cobro = venta)
+// ========================
+async function getProductPrices(product_id) {
+  const invRes = await db.query(
+    'SELECT purchase_price, sale_price FROM inventory_entries WHERE product_id = $1 ORDER BY date DESC LIMIT 1',
+    [product_id]
+  );
+  if (invRes.rows.length === 0) throw new Error('No existe historial de compras para obtener un precio definido');
+  return invRes.rows[0];
+}
+
+app.get('/api/fiados', async (req, res) => {
+  try {
+    const status = req.query.status || 'pending';
+    const query = `
+      SELECT f.*, p.name AS product_name
+      FROM fiados f
+      LEFT JOIN products p ON f.product_id = p.id
+      WHERE f.status = $1
+      ORDER BY f.date DESC
+    `;
+    const { rows } = await db.query(query, [status]);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/fiados', async (req, res) => {
+  const { product_id, quantity, debtor_name, description } = req.body;
+  try {
+    if (!product_id || !quantity || quantity < 1 || !debtor_name?.trim()) {
+      return res.status(400).json({ error: 'Producto, cantidad y nombre de quien fía son obligatorios' });
+    }
+
+    await db.query('BEGIN');
+
+    const prodRes = await db.query('SELECT * FROM products WHERE id = $1', [product_id]);
+    if (prodRes.rows.length === 0) throw new Error('Producto no encontrado');
+    const product = prodRes.rows[0];
+    if (product.stock < quantity) throw new Error('No hay suficiente stock');
+
+    const pr = await getProductPrices(product_id);
+    const total = pr.sale_price * quantity;
+    const profit = (pr.sale_price - pr.purchase_price) * quantity;
+    const desc = description?.trim()
+      ? `${debtor_name.trim()} — ${description.trim()}`
+      : `Fiado: ${debtor_name.trim()}`;
+
+    const { rows } = await db.query(
+      `INSERT INTO fiados (product_id, quantity, debtor_name, description, total, profit, status)
+       VALUES ($1, $2, $3, $4, $5, $6, 'pending') RETURNING *`,
+      [product_id, quantity, debtor_name.trim(), desc, total, profit]
+    );
+
+    await db.query('UPDATE products SET stock = stock - $1 WHERE id = $2', [quantity, product_id]);
+
+    await db.query('COMMIT');
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    await db.query('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/fiados/:id/settle', async (req, res) => {
+  const { id } = req.params;
+  const { payment_method } = req.body;
+  const method = payment_method || 'Efectivo';
+
+  try {
+    await db.query('BEGIN');
+
+    const fiadoRes = await db.query('SELECT * FROM fiados WHERE id = $1', [id]);
+    if (fiadoRes.rows.length === 0) throw new Error('Fiado no encontrado');
+    const fiado = fiadoRes.rows[0];
+    if (fiado.status !== 'pending') throw new Error('Este fiado ya fue cobrado o cancelado');
+
+    const saleRes = await db.query(
+      `INSERT INTO sales (product_id, quantity, payment_method, total, profit)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [fiado.product_id, fiado.quantity, method, fiado.total, fiado.profit]
+    );
+
+    await db.query(
+      `UPDATE fiados SET status = 'settled', settled_at = CURRENT_TIMESTAMP WHERE id = $1`,
+      [id]
+    );
+
+    await db.query('COMMIT');
+    res.json({ fiado: { ...fiado, status: 'settled' }, sale: saleRes.rows[0] });
+  } catch (err) {
+    await db.query('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/fiados/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await db.query('BEGIN');
+
+    const fiadoRes = await db.query('SELECT * FROM fiados WHERE id = $1', [id]);
+    if (fiadoRes.rows.length === 0) throw new Error('Fiado no encontrado');
+    const fiado = fiadoRes.rows[0];
+
+    if (fiado.status === 'pending' && fiado.product_id) {
+      await db.query('UPDATE products SET stock = stock + $1 WHERE id = $2', [
+        fiado.quantity,
+        fiado.product_id
+      ]);
+    }
+
+    await db.query('DELETE FROM fiados WHERE id = $1', [id]);
+
+    await db.query('COMMIT');
+    res.status(204).send();
+  } catch (err) {
+    await db.query('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ========================
 // DASHBOARD
 // ========================
 app.get('/api/dashboard', async (req, res) => {
@@ -337,9 +461,15 @@ app.get('/api/dashboard', async (req, res) => {
       'SELECT COALESCE(SUM(total), 0) as total_sales, COALESCE(SUM(profit), 0) as total_profit FROM sales WHERE date >= CURRENT_DATE'
     );
     
-    // Expenses today
+    // Expenses today (gastos en efectivo / servicios)
     const expensesRes = await db.query(
       'SELECT COALESCE(SUM(value), 0) as total_expenses FROM expenses WHERE date >= CURRENT_DATE'
+    );
+
+    // Fiados pendientes (cuentas por cobrar — restan del neto hasta cobrar)
+    const fiadosRes = await db.query(
+      `SELECT COALESCE(SUM(total), 0) as pending_total, COUNT(*)::int as pending_count
+       FROM fiados WHERE status = 'pending'`
     );
 
     // Low stock
@@ -354,11 +484,17 @@ app.get('/api/dashboard', async (req, res) => {
       ORDER BY DATE(date) ASC
     `);
 
+    const todayProfit = parseFloat(salesRes.rows[0].total_profit);
+    const todayExpenses = parseFloat(expensesRes.rows[0].total_expenses);
+    const pendingFiados = parseFloat(fiadosRes.rows[0].pending_total);
+
     res.json({
       todaySales: parseFloat(salesRes.rows[0].total_sales),
-      todayProfit: parseFloat(salesRes.rows[0].total_profit),
-      todayExpenses: parseFloat(expensesRes.rows[0].total_expenses),
-      netProfit: parseFloat(salesRes.rows[0].total_profit) - parseFloat(expensesRes.rows[0].total_expenses),
+      todayProfit,
+      todayExpenses,
+      pendingFiados,
+      pendingFiadosCount: fiadosRes.rows[0].pending_count,
+      netProfit: todayProfit - todayExpenses - pendingFiados,
       lowStock: lowStockRes.rows,
       charts: chartsRes.rows,
     });

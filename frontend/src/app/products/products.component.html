@@ -7,15 +7,12 @@
 
   <div class="card mt-4">
     <div class="products-view">
-      <!-- Vista de Tabla -->
       <div class="table-container" *ngIf="products.length > 0; else noProducts">
         <table class="table">
           <thead>
             <tr>
               <th>Nombre</th>
               <th>Categoría</th>
-              <th>Precio Compra</th>
-              <th>Precio Venta</th>
               <th>Stock</th>
               <th>Estado</th>
               <th>Acciones</th>
@@ -32,8 +29,6 @@
               <td>
                 <span class="badge badge-primary">{{ p.category || 'General' }}</span>
               </td>
-              <td class="text-right">${{ p.purchase_price | number:'1.2-2' }}</td>
-              <td class="text-right"><strong>${{ p.sale_price | number:'1.2-2' }}</strong></td>
               <td class="text-center">
                 <span [ngClass]="{'danger-text': p.stock < 5, 'success-text': p.stock >= 20}">
                   <strong>{{ p.stock }}</strong>
@@ -65,14 +60,13 @@
         <div class="no-data">
           <i class="fas fa-box-open"></i>
           <p>Sin productos registrados</p>
-          <p class="hint">Crea el primer producto para comenzar a vender</p>
+          <p class="hint">Crea el primer producto y luego abastécelo en Inventario</p>
         </div>
       </ng-template>
     </div>
   </div>
 </div>
 
-<!-- Modal de Producto -->
 <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -87,26 +81,19 @@
     
     <div class="form-section">
       <div class="form-group">
-        <label class="label-required">Nombre del Producto</label>
-        <input type="text" class="input input-large" placeholder="Ej: Cerveza Pilsen" [(ngModel)]="formData.name">
+        <label class="label-required">Nombre del producto</label>
+        <input type="text" class="input input-large" placeholder="Ej: Pilsener" [(ngModel)]="formData.name">
       </div>
       
       <div class="form-group">
         <label class="label-required">Categoría</label>
-        <input type="text" class="input input-large" placeholder="Ej: Bebida, Snack, Licor" [(ngModel)]="formData.category">
+        <input type="text" class="input input-large" placeholder="Ej: Cerveza, Cigarro, Snack..." [(ngModel)]="formData.category">
       </div>
-      
-      <div class="grid grid-2 gap-2">
-        <div class="form-group">
-          <label class="label-required">Precio Compra ($)</label>
-          <input type="number" class="input input-large" [(ngModel)]="formData.purchase_price" min="0" step="0.01">
-        </div>
-        
-        <div class="form-group">
-          <label class="label-required">Precio Venta ($)</label>
-          <input type="number" class="input input-large" [(ngModel)]="formData.sale_price" min="0" step="0.01">
-        </div>
-      </div>
+
+      <p class="form-hint">
+        <i class="fas fa-info-circle"></i>
+        Los precios de compra y venta se registran al abastecer en Inventario.
+      </p>
       
       <div class="modal-footer">
         <button class="btn btn-secondary btn-large" (click)="closeModal()">

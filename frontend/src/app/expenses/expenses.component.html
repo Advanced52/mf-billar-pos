@@ -1,108 +1,228 @@
-<div class="expenses-container">
-  <div class="grid grid-2 gap-4">
-    <!-- Registro de Gasto -->
-    <div class="card expense-form">
-      <div class="card-header">
-        <h3><i class="fas fa-plus-circle"></i> Nuevo Gasto</h3>
-      </div>
-      
-      <div class="form-section">
-        <div class="form-group">
-          <label class="label-required">Descripción</label>
-          <input type="text" class="input input-large" placeholder="Ej. Luz, Reparación, Suministros..." [(ngModel)]="formData.description">
+<div class="expenses-page">
+  <div class="expense-tabs">
+    <button type="button" class="tab-btn" [class.active]="activeTab === 'fiado'" (click)="setTab('fiado')">
+      <i class="fas fa-hand-holding-dollar"></i> Fiado (crédito)
+    </button>
+    <button type="button" class="tab-btn" [class.active]="activeTab === 'normal'" (click)="setTab('normal')">
+      <i class="fas fa-file-invoice-dollar"></i> Gasto normal
+    </button>
+  </div>
+
+  <div class="expenses-layout">
+    <!-- Panel izquierdo: formulario -->
+    <div class="card form-panel">
+      <!-- FIADO -->
+      <ng-container *ngIf="activeTab === 'fiado'">
+        <div class="card-header">
+          <div>
+            <h3><i class="fas fa-hand-holding-dollar"></i> Registrar fiado</h3>
+            <p class="small-text">Descuenta stock y queda pendiente hasta que cobres.</p>
+          </div>
         </div>
-        
-        <div class="form-group">
-          <label class="label-required">Monto ($)</label>
-          <input type="number" class="input input-large" [(ngModel)]="formData.value" min="0" placeholder="0.00">
+
+        <div class="form-section">
+          <div class="quick-products" *ngIf="products.length">
+            <div class="section-title">Productos frecuentes</div>
+            <div class="quick-grid">
+              <button type="button" *ngFor="let p of products | slice:0:6"
+                class="quick-card"
+                [class.selected]="fiadoForm.product_id == p.id"
+                (click)="fiadoForm.product_id = p.id; fiadoForm.quantity = 1">
+                <div class="quick-icon">{{ getProductIcon(p.name) }}</div>
+                <div class="quick-text">
+                  <span class="quick-name">{{ p.name }}</span>
+                  <span class="quick-price">${{ p.sale_price | number:'1.2-2' }}</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="label-required">Producto</label>
+            <select class="input input-large" [(ngModel)]="fiadoForm.product_id">
+              <option value="">-- Seleccione --</option>
+              <option *ngFor="let p of products" [value]="p.id">{{ p.name }} (Stock: {{ p.stock }})</option>
+            </select>
+          </div>
+
+          <div class="grid grid-2 gap-2">
+            <div class="form-group">
+              <label class="label-required">Cantidad</label>
+              <input type="number" class="input input-large" [(ngModel)]="fiadoForm.quantity" min="1">
+            </div>
+            <div class="form-group">
+              <label class="label-required">Quién fía</label>
+              <input type="text" class="input input-large" placeholder="Nombre de la persona" [(ngModel)]="fiadoForm.debtor_name">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Nota (opcional)</label>
+            <input type="text" class="input input-large" placeholder="Ej. 2 cajetillas Lark" [(ngModel)]="fiadoForm.description">
+          </div>
+
+          <div class="product-info" *ngIf="getSelectedProduct() as sel">
+            <span class="info-chip">Stock: {{ sel.stock }}</span>
+            <span class="info-chip">Precio: ${{ sel.sale_price | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="total-box fiado-total">
+            <div class="total-highlight">PENDIENTE DE COBRO</div>
+            <div class="total-number money">${{ getFiadoTotal() | number:'1.2-2' }}</div>
+          </div>
+
+          <button class="btn btn-warning w-100 btn-xl" (click)="registerFiado()"
+            [disabled]="!fiadoForm.product_id || !fiadoForm.debtor_name.trim()">
+            <i class="fas fa-bookmark"></i> REGISTRAR FIADO
+          </button>
         </div>
-        
-        <button class="btn btn-danger btn-xl w-100 mt-4" (click)="registerExpense()" [disabled]="!formData.description || formData.value <= 0">
-          <i class="fas fa-plus-circle"></i> REGISTRAR GASTO
-        </button>
-      </div>
+      </ng-container>
+
+      <!-- GASTO NORMAL -->
+      <ng-container *ngIf="activeTab === 'normal'">
+        <div class="card-header">
+          <div>
+            <h3><i class="fas fa-receipt"></i> Gasto del local</h3>
+            <p class="small-text">Luz, internet, reparaciones, etc.</p>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-group">
+            <label class="label-required">Descripción</label>
+            <input type="text" class="input input-large" placeholder="Ej. Luz, Internet..." [(ngModel)]="normalForm.description">
+          </div>
+
+          <div class="form-group">
+            <label class="label-required">Monto ($)</label>
+            <input type="number" class="input input-large" [(ngModel)]="normalForm.value" min="0" step="0.01">
+          </div>
+
+          <button class="btn btn-danger w-100 btn-xl" (click)="registerExpense()"
+            [disabled]="!normalForm.description || normalForm.value <= 0">
+            <i class="fas fa-minus-circle"></i> REGISTRAR GASTO
+          </button>
+        </div>
+      </ng-container>
     </div>
-    
-    <!-- Historial de Gastos -->
-    <div class="card expenses-history">
-      <div class="card-header">
-        <h3><i class="fas fa-history"></i> Historial de Gastos</h3>
-      </div>
-      
-      <div class="table-container" *ngIf="expenses.length > 0; else noExpenses">
-        <table class="table table-sm">
-          <thead>
-            <tr>
-              <th>Descripción</th>
-              <th>Monto</th>
-              <th>Fecha</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let e of expenses">
-              <td>
-                <div class="expense-description">
-                  <i class="fas fa-tag"></i> {{ e.description }}
-                </div>
-              </td>
-              <td class="danger-text">
-                <strong>-${{ e.value | number:'1.2-2' }}</strong>
-              </td>
-              <td class="text-center">{{ e.date | date:'dd/MM/yyyy' }}</td>
-              <td>
-                <div class="action-buttons">
-                  <button class="btn btn-sm btn-secondary btn-icon-sm" (click)="openEditModal(e)" title="Editar">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                  <button class="btn btn-sm btn-danger btn-icon-sm" (click)="deleteExpense(e.id)" title="Eliminar">
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      
-      <ng-template #noExpenses>
-        <div class="no-data">
-          <i class="fas fa-inbox"></i>
-          <p>Sin gastos registrados</p>
+
+    <!-- Panel derecho: pendientes + historial -->
+    <div class="right-panels">
+      <div class="card fiados-panel card--gold">
+        <div class="card-header">
+          <div>
+            <h3><i class="fas fa-clock"></i> Fiados pendientes</h3>
+            <p class="small-text" *ngIf="fiados.length">
+              Total por cobrar: <strong class="warning-text money">${{ pendingFiadosTotal | number:'1.2-2' }}</strong>
+            </p>
+          </div>
         </div>
-      </ng-template>
+
+        <div class="settle-bar" *ngIf="fiados.length">
+          <label>Cobrar con:</label>
+          <select class="input" [(ngModel)]="settlePayment">
+            <option value="Efectivo">Efectivo</option>
+            <option value="Tarjeta">Tarjeta / Transferencia</option>
+          </select>
+        </div>
+
+        <div class="fiados-list" *ngIf="fiados.length > 0; else noFiados">
+          <div class="fiado-entry" *ngFor="let f of fiados">
+            <div class="fiado-main">
+              <div class="fiado-icon">{{ getProductIcon(f.product_name) }}</div>
+              <div>
+                <div class="fiado-debtor">{{ f.debtor_name }}</div>
+                <div class="fiado-detail">{{ f.product_name }} × {{ f.quantity }}</div>
+                <div class="fiado-date">{{ f.date | date:'dd/MM/yyyy HH:mm' }}</div>
+              </div>
+              <div class="fiado-amount money">${{ f.total | number:'1.2-2' }}</div>
+            </div>
+            <div class="fiado-actions">
+              <button class="btn btn-success btn-sm" (click)="settleFiado(f)">
+                <i class="fas fa-check"></i> Cobrar
+              </button>
+              <button class="btn btn-ghost btn-sm" (click)="cancelFiado(f)">
+                <i class="fas fa-undo"></i> Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #noFiados>
+          <div class="no-data compact">
+            <i class="fas fa-check-circle success-text"></i>
+            <p>No hay fiados pendientes</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <div class="card expenses-panel">
+        <div class="card-header">
+          <h3><i class="fas fa-history"></i> Gastos registrados</h3>
+        </div>
+
+        <div class="table-container" *ngIf="expenses.length > 0; else noExpenses">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Descripción</th>
+                <th>Monto</th>
+                <th>Fecha</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let e of expenses">
+                <td>{{ e.description }}</td>
+                <td class="danger-text"><strong>-${{ e.value | number:'1.2-2' }}</strong></td>
+                <td class="text-center">{{ e.date | date:'dd/MM' }}</td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="btn btn-sm btn-secondary btn-icon-sm" (click)="openEditModal(e)" title="Editar">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger btn-icon-sm" (click)="deleteExpense(e.id)" title="Eliminar">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <ng-template #noExpenses>
+          <div class="no-data compact">
+            <i class="fas fa-inbox"></i>
+            <p>Sin gastos normales</p>
+          </div>
+        </ng-template>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Modal de Edición -->
+<!-- Modal gasto normal -->
 <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h2><i class="fas fa-edit"></i> Editar Gasto</h2>
+      <h2><i class="fas fa-edit"></i> Editar gasto</h2>
       <button class="modal-close" (click)="closeModal()" aria-label="Cerrar">
         <i class="fas fa-times"></i>
       </button>
     </div>
-    
     <div class="form-section">
       <div class="form-group">
         <label class="label-required">Descripción</label>
         <input type="text" class="input input-large" [(ngModel)]="editFormData.description">
       </div>
-      
       <div class="form-group">
         <label class="label-required">Monto ($)</label>
         <input type="number" class="input input-large" [(ngModel)]="editFormData.value" min="0">
       </div>
-      
       <div class="modal-footer">
-        <button class="btn btn-secondary btn-large" (click)="closeModal()">
-          <i class="fas fa-times"></i> Cancelar
-        </button>
-        <button class="btn btn-primary btn-large" (click)="updateExpense()">
-          <i class="fas fa-save"></i> Guardar
-        </button>
+        <button class="btn btn-secondary btn-large" (click)="closeModal()">Cancelar</button>
+        <button class="btn btn-primary btn-large" (click)="updateExpense()">Guardar</button>
       </div>
     </div>
   </div>

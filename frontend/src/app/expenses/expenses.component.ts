@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../services/api.service';
 
+type ExpenseTab = 'normal' | 'fiado';
+
 @Component({
   selector: 'app-expenses',
   standalone: true,
@@ -11,12 +13,25 @@ import { ApiService } from '../services/api.service';
   styleUrl: './expenses.component.css'
 })
 export class ExpensesComponent implements OnInit {
+  activeTab: ExpenseTab = 'fiado';
+
+  products: any[] = [];
   expenses: any[] = [];
-  
-  formData = {
+  fiados: any[] = [];
+
+  normalForm = {
     description: '',
     value: 0
   };
+
+  fiadoForm = {
+    product_id: '',
+    quantity: 1,
+    debtor_name: '',
+    description: ''
+  };
+
+  settlePayment = 'Efectivo';
 
   showModal = false;
   editingExpense: any = null;
@@ -28,7 +43,20 @@ export class ExpensesComponent implements OnInit {
   constructor(private api: ApiService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
+    this.loadProducts();
     this.loadExpenses();
+    this.loadFiados();
+  }
+
+  setTab(tab: ExpenseTab) {
+    this.activeTab = tab;
+  }
+
+  loadProducts() {
+    this.api.getProducts().subscribe(res => {
+      this.products = res;
+      this.cdr.detectChanges();
+    });
   }
 
   loadExpenses() {
@@ -38,19 +66,98 @@ export class ExpensesComponent implements OnInit {
     });
   }
 
+  loadFiados() {
+    this.api.getFiados('pending').subscribe(res => {
+      this.fiados = res;
+      this.cdr.detectChanges();
+    });
+  }
+
+  get pendingFiadosTotal(): number {
+    return this.fiados.reduce((sum, f) => sum + parseFloat(f.total || 0), 0);
+  }
+
+  getProductPrice(): number {
+    if (!this.fiadoForm.product_id) return 0;
+    const p = this.products.find(x => x.id == this.fiadoForm.product_id);
+    return p ? parseFloat(p.sale_price) : 0;
+  }
+
+  getSelectedProduct() {
+    return this.products.find(x => x.id == this.fiadoForm.product_id) || null;
+  }
+
+  getFiadoTotal(): number {
+    return this.getProductPrice() * (this.fiadoForm.quantity || 0);
+  }
+
+  getProductIcon(name: string) {
+    const key = (name || '').toLowerCase();
+    if (key.includes('cigarro') || key.includes('tabaco') || key.includes('lark')) return '🚬';
+    if (key.includes('corona') || key.includes('pilsener') || key.includes('cerveza')) return '🍺';
+    if (key.includes('billar') || key.includes('mesa')) return '🎱';
+    return '🛒';
+  }
+
   registerExpense() {
-    if (!this.formData.description || this.formData.value <= 0) {
-      alert("Completar todos los campos correctamente.");
+    if (!this.normalForm.description || this.normalForm.value <= 0) {
+      alert('Completa descripción y monto.');
       return;
     }
-    
-    this.api.createExpense(this.formData).subscribe({
+
+    this.api.createExpense(this.normalForm).subscribe({
       next: () => {
         this.loadExpenses();
-        this.formData.description = '';
-        this.formData.value = 0;
+        this.normalForm = { description: '', value: 0 };
       },
-      error: (err) => alert("Error: " + err.error.error)
+      error: (err) => alert('Error: ' + (err.error?.error || err.message))
+    });
+  }
+
+  registerFiado() {
+    if (!this.fiadoForm.product_id || this.fiadoForm.quantity < 1 || !this.fiadoForm.debtor_name.trim()) {
+      alert('Selecciona producto, cantidad y quién fía.');
+      return;
+    }
+
+    const p = this.getSelectedProduct();
+    if (p && p.stock < this.fiadoForm.quantity) {
+      alert('No hay suficiente stock.');
+      return;
+    }
+
+    this.api.createFiado(this.fiadoForm).subscribe({
+      next: () => {
+        this.loadFiados();
+        this.loadProducts();
+        this.fiadoForm = { product_id: '', quantity: 1, debtor_name: '', description: '' };
+      },
+      error: (err) => alert('Error: ' + (err.error?.error || err.message))
+    });
+  }
+
+  settleFiado(fiado: any) {
+    const msg = `¿Cobrar $${fiado.total} a ${fiado.debtor_name}? Se registrará como venta y dejará de contar como gasto pendiente.`;
+    if (!confirm(msg)) return;
+
+    this.api.settleFiado(fiado.id, this.settlePayment).subscribe({
+      next: () => {
+        this.loadFiados();
+        this.loadProducts();
+      },
+      error: (err) => alert('Error: ' + (err.error?.error || err.message))
+    });
+  }
+
+  cancelFiado(fiado: any) {
+    if (!confirm(`¿Cancelar fiado de ${fiado.debtor_name}? El stock volverá al inventario.`)) return;
+
+    this.api.deleteFiado(fiado.id).subscribe({
+      next: () => {
+        this.loadFiados();
+        this.loadProducts();
+      },
+      error: (err) => alert('Error: ' + (err.error?.error || err.message))
     });
   }
 
@@ -70,27 +177,25 @@ export class ExpensesComponent implements OnInit {
 
   updateExpense() {
     if (!this.editFormData.description || this.editFormData.value <= 0) {
-      alert("Completar todos los campos correctamente.");
+      alert('Completa todos los campos.');
       return;
     }
-    
+
     this.api.updateExpense(this.editingExpense.id, this.editFormData).subscribe({
       next: () => {
         this.loadExpenses();
         this.closeModal();
       },
-      error: (err) => alert("Error: " + err.error.error)
+      error: (err) => alert('Error: ' + (err.error?.error || err.message))
     });
   }
 
   deleteExpense(id: number) {
-    if (confirm("¿Estás seguro de que deseas eliminar este gasto?")) {
-      this.api.deleteExpense(id).subscribe({
-        next: () => {
-          this.loadExpenses();
-        },
-        error: (err) => alert("Error: " + err.error.error)
-      });
-    }
+    if (!confirm('¿Eliminar este gasto?')) return;
+
+    this.api.deleteExpense(id).subscribe({
+      next: () => this.loadExpenses(),
+      error: (err) => alert('Error: ' + (err.error?.error || err.message))
+    });
   }
 }

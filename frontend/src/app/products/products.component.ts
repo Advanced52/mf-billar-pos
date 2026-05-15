@@ -16,9 +16,7 @@ export class ProductsComponent implements OnInit {
   editingProduct: any = null;
   formData = {
     name: '',
-    category: '',
-    purchase_price: 0,
-    sale_price: 0
+    category: ''
   };
 
   constructor(private api: ApiService, private cdr: ChangeDetectorRef) {}
@@ -37,10 +35,13 @@ export class ProductsComponent implements OnInit {
   openModal(product: any = null) {
     if (product) {
       this.editingProduct = product;
-      this.formData = { ...product };
+      this.formData = {
+        name: product.name,
+        category: product.category || ''
+      };
     } else {
       this.editingProduct = null;
-      this.formData = { name: '', category: '', purchase_price: 0, sale_price: 0 };
+      this.formData = { name: '', category: '' };
     }
     this.showModal = true;
   }
@@ -50,13 +51,23 @@ export class ProductsComponent implements OnInit {
   }
 
   saveProduct() {
+    if (!this.formData.name.trim() || !this.formData.category.trim()) {
+      alert('Completa nombre y categoría.');
+      return;
+    }
+
+    const payload = {
+      name: this.formData.name.trim(),
+      category: this.formData.category.trim()
+    };
+
     if (this.editingProduct) {
-      this.api.updateProduct(this.editingProduct.id, this.formData).subscribe(() => {
+      this.api.updateProduct(this.editingProduct.id, payload).subscribe(() => {
         this.loadProducts();
         this.closeModal();
       });
     } else {
-      this.api.createProduct(this.formData).subscribe(() => {
+      this.api.createProduct(payload).subscribe(() => {
         this.loadProducts();
         this.closeModal();
       });

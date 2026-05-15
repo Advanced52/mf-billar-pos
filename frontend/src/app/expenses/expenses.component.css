@@ -1,298 +1,315 @@
-/* ============================================
-   EXPENSES COMPONENT
-   ============================================ */
-
-.expenses-container {
+.expenses-page {
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
+.expense-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
-/* ============================================
-   CARDS
-   ============================================ */
-
-.card-header {
+.tab-btn {
+  flex: 1;
+  min-width: 160px;
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid var(--border-color);
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, rgba(13, 107, 71, 0.25), rgba(212, 160, 23, 0.1));
+  border-color: var(--border-gold);
+  color: var(--text-primary);
+}
+
+.tab-btn.active i {
+  color: var(--accent-light);
+}
+
+.expenses-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 420px) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.form-panel {
+  position: sticky;
+  top: 88px;
+}
+
+.card-header {
+  padding: 18px 20px 0;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0;
+  padding-bottom: 14px;
 }
 
 .card-header h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
-  color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .card-header h3 i {
-  font-size: 20px;
   color: var(--accent);
 }
 
-.expense-form .card-header h3 i {
-  color: var(--danger);
-}
-
-/* ============================================
-   EXPENSE FORM
-   ============================================ */
-
-.expense-form {
-  position: sticky;
-  top: 100px;
-  height: fit-content;
+.small-text {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--text-tertiary);
 }
 
 .form-section {
+  padding: 18px 20px 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-group label {
-  font-size: 13px;
+.section-title {
+  font-size: 11px;
   font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+  margin-bottom: 10px;
 }
 
-.form-group .input {
-  padding: 14px;
-  font-size: 15px;
-  background-color: var(--bg-tertiary);
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.quick-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-inner);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
   color: var(--text-primary);
-  transition: all 0.2s;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
 }
 
-.form-group .input:focus {
-  outline: none;
-  border-color: var(--danger);
-  background-color: var(--bg-secondary);
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+.quick-card:hover,
+.quick-card.selected {
+  border-color: var(--border-gold);
+  background: rgba(13, 107, 71, 0.15);
 }
 
-.form-group .input::placeholder {
+.quick-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  background: rgba(13, 107, 71, 0.2);
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+}
+
+.quick-name {
+  font-size: 12px;
+  font-weight: 600;
+  display: block;
+}
+
+.quick-price {
+  font-size: 11px;
   color: var(--text-tertiary);
 }
 
-/* ============================================
-   EXPENSES HISTORY
-   ============================================ */
-
-.expenses-history {
+.product-info {
   display: flex;
-  flex-direction: column;
-  min-height: 400px;
-}
-
-.expenses-history .card-header h3 i {
-  color: var(--info);
-}
-
-/* ============================================
-   TABLE
-   ============================================ */
-
-.table-container {
-  overflow-x: auto;
-  flex: 1;
-}
-
-.table {
-  font-size: 13px;
-  margin-top: 0;
-}
-
-.table thead {
-  background-color: var(--bg-tertiary);
-  position: sticky;
-  top: 0;
-}
-
-.table th {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 12px;
-}
-
-.table td {
-  padding: 14px 12px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.table tbody tr:hover {
-  background-color: rgba(239, 68, 68, 0.05);
-}
-
-.expense-description {
-  display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.expense-description i {
-  color: var(--text-tertiary);
+.info-chip {
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--bg-inner);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
 }
 
-.danger-text {
-  color: var(--danger);
-  font-weight: 600;
-}
-
-.text-center {
+.total-box {
   text-align: center;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-gold);
+  background: rgba(245, 158, 11, 0.08);
 }
 
-/* ============================================
-   ACTION BUTTONS
-   ============================================ */
+.fiado-total .total-highlight {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--warning);
+}
+
+.fiado-total .total-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--warning);
+}
+
+.right-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.fiados-panel .card-header {
+  border-bottom-color: var(--border-gold);
+}
+
+.settle-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px 12px;
+}
+
+.settle-bar label {
+  margin: 0;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.settle-bar .input {
+  max-width: 200px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.fiados-list {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.fiado-entry {
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-inner);
+  border: 1px solid var(--border-color);
+}
+
+.fiado-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.fiado-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background: rgba(245, 158, 11, 0.15);
+  border-radius: var(--radius-sm);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.fiado-debtor {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.fiado-detail {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.fiado-date {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+.fiado-amount {
+  margin-left: auto;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--warning);
+  flex-shrink: 0;
+}
+
+.fiado-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fiado-actions .btn {
+  flex: 1;
+}
+
+.expenses-panel .table-container {
+  margin: 0 16px 16px;
+  border: none;
+}
+
+.no-data.compact {
+  padding: 28px 16px;
+  margin: 0 16px 16px;
+}
 
 .action-buttons {
   display: flex;
   gap: 6px;
-  justify-content: center;
-}
-
-.btn-icon-sm {
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-}
-
-/* ============================================
-   NO DATA
-   ============================================ */
-
-.no-data {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  text-align: center;
-  color: var(--text-secondary);
-  background: rgba(239, 68, 68, 0.05);
-  border-radius: 8px;
-  border: 2px dashed var(--border-light);
-  flex: 1;
-}
-
-.no-data i {
-  font-size: 48px;
-  color: var(--text-tertiary);
-  margin-bottom: 12px;
-  opacity: 0.5;
-}
-
-.no-data p {
-  margin: 0;
-  font-size: 14px;
-}
-
-/* ============================================
-   MODAL
-   ============================================ */
-
-.modal-footer {
-  display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid var(--border-color);
 }
 
-.modal-footer .btn {
-  min-width: 140px;
-}
-
-/* ============================================
-   RESPONSIVE
-   ============================================ */
-
-@media (max-width: 1024px) {
-  .expense-form {
-    top: 80px;
-  }
-}
-
-@media (max-width: 900px) {
-  :root {
+@media (max-width: 1000px) {
+  .expenses-layout {
     grid-template-columns: 1fr;
   }
 
-  .expense-form {
+  .form-panel {
     position: static;
-    margin-bottom: 24px;
-  }
-
-  .table {
-    font-size: 12px;
-  }
-
-  .table th,
-  .table td {
-    padding: 10px 8px;
   }
 }
 
-@media (max-width: 768px) {
-  .card-header h3 {
-    font-size: 16px;
+@media (max-width: 520px) {
+  .quick-grid {
+    grid-template-columns: 1fr;
   }
 
-  .form-group .input {
-    font-size: 14px;
-  }
-
-  .table {
-    font-size: 11px;
-  }
-
-  .table th,
-  .table td {
-    padding: 8px 6px;
-  }
-
-  .btn-icon-sm {
-    width: 32px;
-    height: 32px;
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .card-header h3 {
-    font-size: 14px;
-  }
-
-  .modal-footer {
-    flex-direction: column-reverse;
-  }
-
-  .modal-footer .btn {
-    min-width: auto;
-    width: 100%;
+  .tab-btn {
+    min-width: 100%;
   }
 }

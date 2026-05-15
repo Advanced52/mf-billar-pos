@@ -101,14 +101,14 @@
                 <i class="fas" [class]="getPaymentIcon(s.payment_method)"></i> {{ s.payment_method }}
               </span>
             </div>
-          </div>
-          <div class="sale-actions">
-            <button class="btn btn-sm btn-secondary btn-icon-sm" (click)="openEditModal(s)" title="Editar">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn btn-sm btn-danger btn-icon-sm" (click)="deleteSale(s.id)" title="Eliminar">
-              <i class="fas fa-trash-alt"></i>
-            </button>
+            <div class="sale-actions">
+              <button class="btn btn-sm btn-secondary btn-icon-sm" (click)="openEditModal(s)" title="Editar">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-danger btn-icon-sm" (click)="deleteSale(s.id)" title="Eliminar">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>

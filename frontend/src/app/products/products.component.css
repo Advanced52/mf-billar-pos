@@ -173,6 +173,21 @@
   box-shadow: 0 0 0 3px rgba(13, 107, 71, 0.2);
 }
 
+.form-hint {
+  margin: 0;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: rgba(13, 107, 71, 0.08);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+.form-hint i {
+  color: var(--accent);
+  margin-right: 8px;
+}
+
 .form-group .input::placeholder {
   color: var(--text-tertiary);
 }

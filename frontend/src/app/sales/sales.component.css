@@ -326,9 +326,7 @@
 }
 
 .sale-entry {
-  display: grid;
-  gap: 10px;
-  padding: 14px;
+  padding: 12px 14px;
   border-radius: var(--radius-md);
   background: var(--bg-inner);
   border: 1px solid var(--border-color);
@@ -345,13 +343,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
+  width: 100%;
 }
 
 .sale-left {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
 }
 
 .sale-icon {
@@ -381,7 +382,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 8px;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .sale-total {
@@ -392,7 +394,9 @@
 
 .sale-actions {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .badge {
@@ -503,12 +507,19 @@
   }
 
   .sale-card {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-wrap: wrap;
+    row-gap: 10px;
   }
 
   .sale-right {
     align-items: flex-start;
+    margin-left: 0;
+    order: 2;
+  }
+
+  .sale-actions {
+    margin-left: auto;
+    order: 3;
   }
 }
 

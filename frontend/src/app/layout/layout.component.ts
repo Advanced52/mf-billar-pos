@@ -25,7 +25,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     sales: { title: 'Punto de venta', subtitle: 'Registra ventas rápido en mostrador' },
     products: { title: 'Catálogo de productos', subtitle: 'Precios, categorías y stock' },
     inventory: { title: 'Inventario', subtitle: 'Abastecimiento y entradas de mercadería' },
-    expenses: { title: 'Gastos', subtitle: 'Control de egresos del local' }
+    expenses: { title: 'Gastos y fiados', subtitle: 'Gastos del local y créditos por cobrar' }
   };
 
   constructor(private router: Router) {}
