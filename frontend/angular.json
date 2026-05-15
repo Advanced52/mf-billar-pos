@@ -79,6 +79,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "allowedHosts": ["billarmff.maesserver.com"]
+          },
           "configurations": {
             "production": {
               "buildTarget": "frontend:build:production"
