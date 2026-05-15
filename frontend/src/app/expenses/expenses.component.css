@@ -7,24 +7,6 @@
   flex-direction: column;
 }
 
-.header-actions {
-  margin-bottom: 24px;
-}
-
-.header-actions h2 {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.header-actions h2 i {
-  color: var(--danger);
-  font-size: 32px;
-}
 
 /* ============================================
    CARDS
@@ -50,6 +32,11 @@
 
 .card-header h3 i {
   font-size: 20px;
+  color: var(--accent);
+}
+
+.expense-form .card-header h3 i {
+  color: var(--danger);
 }
 
 /* ============================================
@@ -271,10 +258,6 @@
 }
 
 @media (max-width: 768px) {
-  .header-actions h2 {
-    font-size: 22px;
-  }
-
   .card-header h3 {
     font-size: 16px;
   }
@@ -300,10 +283,6 @@
 }
 
 @media (max-width: 480px) {
-  .header-actions h2 {
-    font-size: 18px;
-  }
-
   .card-header h3 {
     font-size: 14px;
   }

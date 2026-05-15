@@ -1,6 +1,5 @@
 <div class="products-container">
-  <div class="header-actions">
-    <h2><i class="fas fa-box"></i> Catálogo de Productos</h2>
+  <div class="page-toolbar">
     <button class="btn btn-primary btn-large" (click)="openModal()">
       <i class="fas fa-plus-circle"></i> Nuevo Producto
     </button>
@@ -25,8 +24,9 @@
           <tbody>
             <tr *ngFor="let p of products">
               <td>
-                <div class="product-name">
-                  <i class="fas fa-cube"></i> {{ p.name }}
+                <div class="row-avatar">
+                  <span class="avatar-circle">{{ p.name?.charAt(0) || '?' }}</span>
+                  <span class="product-name">{{ p.name }}</span>
                 </div>
               </td>
               <td>
@@ -36,12 +36,14 @@
               <td class="text-right"><strong>${{ p.sale_price | number:'1.2-2' }}</strong></td>
               <td class="text-center">
                 <span [ngClass]="{'danger-text': p.stock < 5, 'success-text': p.stock >= 20}">
-                  <strong>{{ p.stock }}</strong> {{ p.stock < 5 ? '⚠️' : '' }}
+                  <strong>{{ p.stock }}</strong>
+                  <i class="fas fa-triangle-exclamation warning-text" *ngIf="p.stock < 5"></i>
                 </span>
               </td>
               <td class="text-center">
                 <span class="badge" [ngClass]="p.stock > 0 ? 'badge-success' : 'badge-danger'">
-                  {{ p.stock > 0 ? '✓ Activo' : '✗ Sin stock' }}
+                  <i class="fas" [class.fa-check]="p.stock > 0" [class.fa-xmark]="p.stock <= 0"></i>
+                  {{ p.stock > 0 ? 'Activo' : 'Sin stock' }}
                 </span>
               </td>
               <td>
@@ -63,7 +65,7 @@
         <div class="no-data">
           <i class="fas fa-box-open"></i>
           <p>Sin productos registrados</p>
-          <p class="small">Crear el primer producto para comenzar</p>
+          <p class="hint">Crea el primer producto para comenzar a vender</p>
         </div>
       </ng-template>
     </div>

@@ -1,11 +1,20 @@
-/* ============================================
-   DASHBOARD - KPI GRID
-   ============================================ */
+.dashboard {
+  max-width: 1400px;
+}
 
-.dashboard h2 {
-  font-size: 28px;
-  margin-bottom: 24px;
-  font-weight: 700;
+.dashboard-hero {
+  margin-bottom: 20px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-gold);
+  box-shadow: var(--shadow-md);
+}
+
+.hero-img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  display: block;
 }
 
 .kpi-grid {
@@ -13,210 +22,56 @@
 }
 
 .kpi-card {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  transition: all 0.3s ease;
+  transition: border-color 0.25s ease;
 }
 
 .kpi-card:hover {
-  transform: translateY(-4px);
+  border-color: var(--border-gold);
 }
 
-.kpi-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
-  background: rgba(124, 58, 237, 0.15);
-  color: var(--primary-light);
+.card--gold {
+  background: linear-gradient(135deg, rgba(212, 160, 23, 0.12), var(--bg-card));
+}
+
+.accent-value {
+  color: var(--accent-light) !important;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 20px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  flex-shrink: 0;
+  gap: 10px;
 }
 
-.kpi-icon.danger {
-  background: rgba(239, 68, 68, 0.15);
-  color: var(--danger);
+.card-title i {
+  color: var(--accent);
 }
-
-.kpi-icon.success {
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--success);
-}
-
-.kpi-icon.warning {
-  background: rgba(245, 158, 11, 0.15);
-  color: var(--warning);
-}
-
-.kpi-icon.info {
-  background: rgba(59, 130, 246, 0.15);
-  color: var(--info);
-}
-
-.kpi-icon.primary {
-  background: rgba(124, 58, 237, 0.15);
-  color: var(--primary-light);
-}
-
-.kpi-info h3 {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-bottom: 6px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.kpi-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-/* ============================================
-   CHART SECTION
-   ============================================ */
 
 .main-dashboard-grid {
-  margin-top: 24px;
+  margin-top: 8px;
 }
 
 .h-100 {
-  height: 100%;
   display: flex;
   flex-direction: column;
-}
-
-.card > h3 {
-  font-size: 18px;
-  margin-bottom: 20px;
-  font-weight: 600;
-  color: var(--text-primary);
 }
 
 .chart-container {
   flex: 1;
   position: relative;
-  min-height: 300px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  min-height: 280px;
 }
 
-/* ============================================
-   BAR CHART
-   ============================================ */
-
-.simple-bar-chart {
-  display: flex;
-  align-items: flex-end;
-  height: 100%;
-  gap: 12px;
-  padding: 20px 0 30px;
+.success-state {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.06);
 }
-
-.bar {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  min-height: 60px;
-}
-
-.bar-fill {
-  width: 100%;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  border-radius: 6px 6px 0 0;
-  transition: all 0.3s ease;
-  min-height: 4px;
-  cursor: pointer;
-}
-
-.bar-fill:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 0 12px rgba(124, 58, 237, 0.4);
-}
-
-.bar-label {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  text-align: center;
-  font-weight: 500;
-}
-
-/* ============================================
-   TABLE SECTION
-   ============================================ */
-
-.table {
-  margin-top: 16px;
-}
-
-.danger-text {
-  color: var(--danger);
-  font-weight: 600;
-}
-
-.no-data {
-  padding: 40px 20px;
-  text-align: center;
-  color: var(--text-secondary);
-  background: rgba(124, 58, 237, 0.05);
-  border-radius: 8px;
-  margin-top: 20px;
-  font-size: 14px;
-  border: 1px dashed var(--border-light);
-}
-
-/* ============================================
-   RESPONSIVE
-   ============================================ */
 
 @media (max-width: 768px) {
-  .dashboard h2 {
-    font-size: 24px;
-  }
-
-  .kpi-icon {
-    width: 56px;
-    height: 56px;
-    font-size: 24px;
-  }
-
-  .kpi-value {
-    font-size: 24px;
-  }
-
-  .chart-container {
-    min-height: 250px;
-  }
-
-  .simple-bar-chart {
-    gap: 8px;
-  }
-}
-
-@media (max-width: 480px) {
-  .dashboard h2 {
-    font-size: 20px;
-  }
-
-  .kpi-icon {
-    width: 48px;
-    height: 48px;
-    font-size: 20px;
-  }
-
   .kpi-value {
     font-size: 20px;
-  }
-
-  .chart-container {
-    min-height: 200px;
   }
 }

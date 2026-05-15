@@ -1,31 +1,71 @@
-<div class="layout-container">
-  <aside class="sidebar">
-    <div class="logo">
-      <i class="fas fa-billiard-ball"></i> Billar MFF
+<div class="layout-container" [class.sidebar-collapsed]="sidebarCollapsed">
+  <div class="sidebar-backdrop" *ngIf="sidebarOpen" (click)="closeSidebar()" aria-hidden="true"></div>
+
+  <aside class="sidebar" [class.open]="sidebarOpen" [class.collapsed]="sidebarCollapsed">
+    <div class="sidebar-inner">
+      <div class="logo">
+        <img src="images/ball-8.svg" alt="" class="logo-ball" width="40" height="40" />
+        <div class="logo-text" *ngIf="!sidebarCollapsed">
+          <span class="logo-name">Billar MFF</span>
+          <span class="logo-tag">POS · Administración</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <span class="nav-section" *ngIf="!sidebarCollapsed">Operación</span>
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="closeSidebar()" [title]="sidebarCollapsed ? 'Dashboard' : ''">
+          <i class="fas fa-gauge-high"></i>
+          <span *ngIf="!sidebarCollapsed">Dashboard</span>
+        </a>
+        <a routerLink="/sales" routerLinkActive="active" class="nav-item" (click)="closeSidebar()" [title]="sidebarCollapsed ? 'Ventas' : ''">
+          <i class="fas fa-cash-register"></i>
+          <span *ngIf="!sidebarCollapsed">Ventas</span>
+        </a>
+
+        <span class="nav-section" *ngIf="!sidebarCollapsed">Administración</span>
+        <a routerLink="/products" routerLinkActive="active" class="nav-item" (click)="closeSidebar()" [title]="sidebarCollapsed ? 'Productos' : ''">
+          <i class="fas fa-beer-mug-empty"></i>
+          <span *ngIf="!sidebarCollapsed">Productos</span>
+        </a>
+        <a routerLink="/inventory" routerLinkActive="active" class="nav-item" (click)="closeSidebar()" [title]="sidebarCollapsed ? 'Inventario' : ''">
+          <i class="fas fa-boxes-stacked"></i>
+          <span *ngIf="!sidebarCollapsed">Inventario</span>
+        </a>
+        <a routerLink="/expenses" routerLinkActive="active" class="nav-item" (click)="closeSidebar()" [title]="sidebarCollapsed ? 'Gastos' : ''">
+          <i class="fas fa-receipt"></i>
+          <span *ngIf="!sidebarCollapsed">Gastos</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer" *ngIf="!sidebarCollapsed">
+        <a routerLink="/sales" class="btn btn-accent w-100" (click)="closeSidebar()">
+          <i class="fas fa-plus"></i> Nueva venta
+        </a>
+      </div>
+
+      <button type="button" class="collapse-toggle" (click)="toggleCollapse()" [attr.aria-label]="sidebarCollapsed ? 'Expandir menú' : 'Colapsar menú'">
+        <i class="fas" [class.fa-angles-right]="sidebarCollapsed" [class.fa-angles-left]="!sidebarCollapsed"></i>
+      </button>
     </div>
-    <nav class="nav-menu">
-      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
-        <i class="fas fa-home"></i> Dashboard
-      </a>
-      <a routerLink="/sales" routerLinkActive="active" class="nav-item">
-        <i class="fas fa-cash-register"></i> Ventas
-      </a>
-      <a routerLink="/products" routerLinkActive="active" class="nav-item">
-        <i class="fas fa-box"></i> Productos
-      </a>
-      <a routerLink="/inventory" routerLinkActive="active" class="nav-item">
-        <i class="fas fa-warehouse"></i> Inventario
-      </a>
-      <a routerLink="/expenses" routerLinkActive="active" class="nav-item">
-        <i class="fas fa-file-invoice-dollar"></i> Gastos
-      </a>
-    </nav>
   </aside>
+
   <main class="main-content">
     <header class="topbar">
-      <h2>Panel de Control</h2>
-
+      <div class="topbar-left">
+        <button type="button" class="btn btn-ghost btn-icon menu-toggle" (click)="toggleSidebar()" aria-label="Abrir menú">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="topbar-titles">
+          <h1>{{ pageTitle }}</h1>
+          <p class="topbar-subtitle">{{ pageSubtitle }}</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <span class="status-pill">Turno activo</span>
+        <span class="topbar-clock"><i class="far fa-clock"></i> {{ currentTime }}</span>
+      </div>
     </header>
+
     <div class="content-wrapper">
       <router-outlet></router-outlet>
     </div>

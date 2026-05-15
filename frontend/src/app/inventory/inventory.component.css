@@ -7,24 +7,6 @@
   flex-direction: column;
 }
 
-.header-actions {
-  margin-bottom: 24px;
-}
-
-.header-actions h2 {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.header-actions h2 i {
-  color: var(--primary-light);
-  font-size: 32px;
-}
 
 /* ============================================
    GRID LAYOUT
@@ -108,7 +90,7 @@
   outline: none;
   border-color: var(--primary);
   background-color: var(--bg-secondary);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 0 0 3px rgba(13, 107, 71, 0.2);
 }
 
 .form-group .input::placeholder {
@@ -161,7 +143,7 @@
 }
 
 .table tbody tr:hover {
-  background-color: rgba(124, 58, 237, 0.05);
+  background-color: rgba(13, 107, 71, 0.08);
 }
 
 .product-name {
@@ -220,7 +202,7 @@
   padding: 60px 20px;
   text-align: center;
   color: var(--text-secondary);
-  background: rgba(124, 58, 237, 0.05);
+  background: rgba(13, 107, 71, 0.06);
   border-radius: 8px;
   border: 2px dashed var(--border-light);
   flex: 1;
@@ -291,10 +273,6 @@
 }
 
 @media (max-width: 768px) {
-  .header-actions h2 {
-    font-size: 22px;
-  }
-
   .card-header h3 {
     font-size: 16px;
   }
@@ -329,10 +307,6 @@
 }
 
 @media (max-width: 480px) {
-  .header-actions h2 {
-    font-size: 18px;
-  }
-
   .card-header h3 {
     font-size: 14px;
   }

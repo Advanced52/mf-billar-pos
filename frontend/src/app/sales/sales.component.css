@@ -18,9 +18,15 @@
   margin: 0;
 }
 
-.header-actions h2 i {
-  margin-right: 14px;
-  color: var(--primary-light);
+.page-intro p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.page-intro i {
+  color: var(--accent);
+  margin-right: 8px;
 }
 
 .subtitle {
@@ -39,10 +45,10 @@
 
 .new-sale-card,
 .sales-history {
-  background: rgba(15, 23, 42, 0.96);
-  border: 1px solid rgba(255,255,255,0.06);
-  box-shadow: 0 22px 60px rgba(15,23,42,0.25);
-  border-radius: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-lg);
 }
 
 .new-sale-card {
@@ -54,15 +60,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 24px 24px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  gap: 12px;
+  padding: 18px 20px 0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .card-header h3 {
   margin: 0;
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 600;
   color: var(--text-primary);
   display: flex;
   align-items: center;
@@ -70,8 +76,8 @@
 }
 
 .card-header h3 i {
-  font-size: 24px;
-  color: var(--primary-light);
+  font-size: 18px;
+  color: var(--accent);
 }
 
 .small-text {
@@ -84,14 +90,14 @@
 .form-section {
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  padding: 24px;
+  gap: 18px;
+  padding: 20px;
 }
 
 .section-title {
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-secondary);
   margin-bottom: 12px;
@@ -106,11 +112,11 @@
 .quick-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 18px;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-inner);
+  border: 1px solid var(--border-color);
   color: var(--text-primary);
   cursor: pointer;
   transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
@@ -119,18 +125,19 @@
 .quick-card:hover,
 .quick-card.selected {
   transform: translateY(-2px);
-  background: rgba(124, 58, 237, 0.14);
-  border-color: rgba(124, 58, 237, 0.28);
+  background: rgba(13, 107, 71, 0.2);
+  border-color: var(--border-gold);
 }
 
 .quick-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
   display: grid;
   place-items: center;
-  background: rgba(255,255,255,0.08);
-  font-size: 22px;
+  background: rgba(13, 107, 71, 0.2);
+  border: 1px solid var(--border-color);
+  font-size: 18px;
 }
 
 .quick-text {
@@ -140,12 +147,12 @@
 }
 
 .quick-name {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .quick-price {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-secondary);
 }
 
@@ -165,8 +172,8 @@
 }
 
 .form-group label {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--text-secondary);
   margin-bottom: 10px;
   text-transform: uppercase;
@@ -174,11 +181,11 @@
 }
 
 .form-group .input {
-  padding: 16px 18px;
-  font-size: 15px;
-  background-color: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 16px;
+  padding: 11px 14px;
+  font-size: 14px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   color: var(--text-primary);
   transition: all 0.2s ease;
   appearance: none; /* For custom arrow if needed, but mainly for consistent behavior */
@@ -186,16 +193,15 @@
 
 /* Fix for unreadable options in dark theme */
 .form-group select.input option {
-  background-color: #1e293b; /* var(--bg-secondary) solid background */
+  background-color: var(--bg-secondary);
   color: var(--text-primary);
-  padding: 12px;
 }
 
 .form-group .input:focus {
   outline: none;
-  border-color: rgba(124, 58, 237, 0.6);
-  background-color: rgba(124, 58, 237, 0.08);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  border-color: var(--primary-light);
+  background-color: rgba(13, 107, 71, 0.1);
+  box-shadow: 0 0 0 3px rgba(13, 107, 71, 0.2);
 }
 
 .product-info {
@@ -207,13 +213,13 @@
 .info-chip {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
+  gap: 6px;
+  padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-inner);
+  border: 1px solid var(--border-color);
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .payment-toggle {
@@ -224,14 +230,14 @@
 
 .toggle-btn {
   flex: 1;
-  min-width: 140px;
-  padding: 16px 20px;
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.04);
+  min-width: 120px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-inner);
   color: var(--text-primary);
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -241,9 +247,13 @@
 }
 
 .toggle-btn.active {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.22), rgba(79, 70, 229, 0.16));
-  border-color: rgba(124, 58, 237, 0.28);
+  background: linear-gradient(135deg, rgba(13, 107, 71, 0.3), rgba(212, 160, 23, 0.12));
+  border-color: var(--border-gold);
   color: var(--text-primary);
+}
+
+.toggle-btn.active i {
+  color: var(--accent-light);
 }
 
 .total-box {
@@ -251,11 +261,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 24px;
-  border-radius: 24px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-  border: 1px solid rgba(255,255,255,0.1);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  padding: 20px 16px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, rgba(212, 160, 23, 0.1), rgba(13, 107, 71, 0.12));
+  border: 1px solid var(--border-gold);
+  box-shadow: none;
 }
 
 .total-highlight {
@@ -267,10 +277,11 @@
 }
 
 .total-number {
-  font-size: 44px;
-  font-weight: 800;
-  color: var(--primary-light);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--accent-light);
   letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
   transition: transform 0.25s ease, color 0.25s ease;
 }
 
@@ -286,10 +297,10 @@
 
 .confirm-button {
   margin-top: 4px;
-  padding: 20px 0;
-  font-size: 17px;
-  border-radius: 20px;
-  box-shadow: 0 18px 40px rgba(124, 58, 237, 0.18);
+  padding: 14px 0;
+  font-size: 14px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 6px 20px rgba(13, 107, 71, 0.25);
 }
 
 .confirm-button i {
@@ -303,8 +314,8 @@
 }
 
 .sales-history .card-header {
-  padding: 24px 24px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 20px 20px 0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .history-scroll {
@@ -316,17 +327,18 @@
 
 .sale-entry {
   display: grid;
-  gap: 12px;
-  padding: 18px 18px 14px;
-  border-radius: 22px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-inner);
+  border: 1px solid var(--border-color);
   transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .sale-entry:hover {
   transform: translateY(-1px);
-  background: rgba(124, 58, 237, 0.12);
+  background: rgba(13, 107, 71, 0.12);
+  border-color: var(--border-gold);
 }
 
 .sale-card {
@@ -343,23 +355,24 @@
 }
 
 .sale-icon {
-  width: 54px;
-  height: 54px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.08);
-  font-size: 22px;
+  border-radius: var(--radius-sm);
+  background: rgba(13, 107, 71, 0.2);
+  border: 1px solid var(--border-color);
+  font-size: 18px;
 }
 
 .sale-title {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
 .sale-subtitle {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-secondary);
   margin-top: 4px;
 }
@@ -372,9 +385,9 @@
 }
 
 .sale-total {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--primary-light);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent-light);
 }
 
 .sale-actions {
@@ -400,8 +413,9 @@
 }
 
 .badge-info {
-  background: rgba(59, 130, 246, 0.12);
+  background: rgba(94, 234, 212, 0.12);
   color: var(--info);
+  border-color: rgba(94, 234, 212, 0.2);
 }
 
 .btn-icon-sm {
@@ -426,16 +440,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 20px;
+  padding: 40px 20px;
   text-align: center;
   color: var(--text-secondary);
-  background: rgba(255,255,255,0.04);
-  border-radius: 18px;
-  border: 1px dashed rgba(255,255,255,0.12);
+  background: var(--bg-inner);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border-light);
 }
 
 .no-data i {
-  font-size: 50px;
+  font-size: 36px;
   color: var(--text-tertiary);
   margin-bottom: 14px;
   opacity: 0.65;
@@ -485,7 +499,7 @@
   }
 
   .total-number {
-    font-size: 38px;
+    font-size: 30px;
   }
 
   .sale-card {
@@ -496,8 +510,6 @@
   .sale-right {
     align-items: flex-start;
   }
-}
-  font-size: 14px;
 }
 
 /* ============================================

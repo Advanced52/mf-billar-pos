@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="feltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d5c3d"/>
+      <stop offset="100%" stop-color="#0a3d2e"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="120" fill="url(#feltGrad)"/>
+  <ellipse cx="400" cy="60" rx="280" ry="42" fill="none" stroke="#d4a017" stroke-width="2" opacity="0.35"/>
+  <circle cx="120" cy="35" r="14" fill="#111" stroke="#d4a017" stroke-width="1.5"/>
+  <circle cx="120" cy="35" r="6" fill="#fff"/>
+  <text x="120" y="39" text-anchor="middle" font-size="9" font-weight="bold" fill="#111">8</text>
+  <circle cx="680" cy="75" r="11" fill="#b91c1c" opacity="0.9"/>
+  <circle cx="710" cy="50" r="11" fill="#1d4ed8" opacity="0.9"/>
+  <circle cx="650" cy="45" r="11" fill="#fbbf24" opacity="0.9"/>
+  <text x="400" y="68" text-anchor="middle" fill="#f5d76e" font-family="Inter, sans-serif" font-size="22" font-weight="700" opacity="0.9">Billar MFF</text>
+</svg>

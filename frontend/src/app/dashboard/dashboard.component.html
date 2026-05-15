@@ -1,77 +1,136 @@
-<div *ngIf="data" class="dashboard">
-  <h2><i class="fas fa-chart-line"></i> Resumen del Día</h2>
-  
-  <div class="grid grid-4 kpi-grid">
-    <div class="card kpi-card">
-      <div class="kpi-icon"><i class="fas fa-shopping-cart"></i></div>
-      <div class="kpi-info">
-        <h3>Ventas</h3>
-        <p class="kpi-value">${{ data.todaySales | number:'1.2-2' }}</p>
-      </div>
-    </div>
-    
-    <div class="card kpi-card">
-      <div class="kpi-icon danger"><i class="fas fa-arrow-down"></i></div>
-      <div class="kpi-info">
-        <h3>Gastos</h3>
-        <p class="kpi-value">${{ data.todayExpenses | number:'1.2-2' }}</p>
-      </div>
-    </div>
-    
-    <div class="card kpi-card">
-      <div class="kpi-icon success"><i class="fas fa-chart-line"></i></div>
-      <div class="kpi-info">
-        <h3>Ganancia Bruta</h3>
-        <p class="kpi-value">${{ data.todayProfit | number:'1.2-2' }}</p>
-      </div>
-    </div>
-    
-    <div class="card kpi-card">
-      <div class="kpi-icon primary"><i class="fas fa-wallet"></i></div>
-      <div class="kpi-info">
-        <h3>Ganancia Neta</h3>
-        <p class="kpi-value">${{ data.netProfit | number:'1.2-2' }}</p>
-      </div>
-    </div>
+<div class="dashboard animate-fade-in">
+  <div class="dashboard-hero" *ngIf="!loading" role="presentation">
+    <img src="images/pool-hero.svg" alt="" class="hero-img" />
   </div>
 
-  <div class="grid grid-2 main-dashboard-grid">
-    <div class="card h-100">
-      <h3><i class="fas fa-chart-bar"></i> Ventas - Últimos 7 Días</h3>
-      <div class="chart-container">
-        <div class="simple-bar-chart" *ngIf="data.charts?.length > 0; else noChart">
-          <div class="bar" *ngFor="let c of data.charts" [title]="c.daily_total">
-            <div class="bar-fill" [style.height.%]="(c.daily_total / maxChartValue) * 100"></div>
-            <span class="bar-label">{{ c.day | date:'dd/MM' }}</span>
-          </div>
-        </div>
-        <ng-template #noChart>
-          <div class="no-data"><i class="fas fa-inbox"></i> Sin datos para mostrar</div>
-        </ng-template>
-      </div>
-    </div>
-    
-    <div class="card h-100">
-      <h3><i class="fas fa-exclamation-triangle"></i> Productos con Bajo Stock</h3>
-      <div *ngIf="data.lowStock?.length === 0" class="no-data">
-        <i class="fas fa-check-circle"></i> Todo el stock está en niveles óptimos
-      </div>
-      <div class="table-container" *ngIf="data.lowStock?.length > 0">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Stock Actual</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let p of data.lowStock">
-              <td>{{ p.name }}</td>
-              <td><strong class="danger-text">{{ p.stock }} unid.</strong></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+  <div class="quick-actions" *ngIf="!loading">
+    <a routerLink="/sales" class="quick-action-card">
+      <i class="fas fa-cash-register"></i>
+      <span>Nueva venta</span>
+    </a>
+    <a routerLink="/inventory" class="quick-action-card">
+      <i class="fas fa-truck-ramp-box"></i>
+      <span>Ingresar stock</span>
+    </a>
+    <a routerLink="/products" class="quick-action-card">
+      <i class="fas fa-beer-mug-empty"></i>
+      <span>Productos</span>
+    </a>
+    <a routerLink="/expenses" class="quick-action-card">
+      <i class="fas fa-receipt"></i>
+      <span>Registrar gasto</span>
+    </a>
   </div>
+
+  <ng-container *ngIf="loading">
+    <div class="skeleton-grid">
+      <div class="skeleton-card" *ngFor="let _ of [1,2,3,4]"></div>
+    </div>
+    <div class="grid grid-2 gap-4">
+      <div class="skeleton-block"></div>
+      <div class="skeleton-block"></div>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!loading && data">
+    <div class="grid grid-4 kpi-grid">
+      <div class="card kpi-card card--elevated">
+        <div class="kpi-icon info"><i class="fas fa-shopping-cart"></i></div>
+        <div class="kpi-info">
+          <h3>Ventas hoy</h3>
+          <p class="kpi-value money">${{ data.todaySales | number:'1.2-2' }}</p>
+          <p class="kpi-sub">Ingresos del día</p>
+        </div>
+      </div>
+
+      <div class="card kpi-card card--elevated">
+        <div class="kpi-icon danger"><i class="fas fa-arrow-trend-down"></i></div>
+        <div class="kpi-info">
+          <h3>Gastos hoy</h3>
+          <p class="kpi-value money">${{ data.todayExpenses | number:'1.2-2' }}</p>
+          <p class="kpi-sub">Egresos registrados</p>
+        </div>
+      </div>
+
+      <div class="card kpi-card card--elevated">
+        <div class="kpi-icon success"><i class="fas fa-chart-line"></i></div>
+        <div class="kpi-info">
+          <h3>Ganancia bruta</h3>
+          <p class="kpi-value money">${{ data.todayProfit | number:'1.2-2' }}</p>
+          <p class="kpi-sub"><i class="fas fa-arrow-trend-up success-text"></i> Ventas − costos</p>
+        </div>
+      </div>
+
+      <div class="card kpi-card card--gold">
+        <div class="kpi-icon gold"><i class="fas fa-coins"></i></div>
+        <div class="kpi-info">
+          <h3>Ganancia neta</h3>
+          <p class="kpi-value money accent-value">${{ data.netProfit | number:'1.2-2' }}</p>
+          <p class="kpi-sub">Después de gastos</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-2 main-dashboard-grid">
+      <div class="card card--elevated h-100">
+        <h3 class="card-title"><i class="fas fa-chart-column"></i> Ventas — últimos 7 días</h3>
+        <div class="chart-container">
+          <div class="chart-avg-line" *ngIf="data.charts?.length" [style.bottom.%]="chartAvgPercent">
+            <span class="chart-avg-label">Promedio</span>
+          </div>
+          <div class="simple-bar-chart" *ngIf="data.charts?.length > 0; else noChart">
+            <div class="bar" *ngFor="let c of data.charts">
+              <span class="bar-value money">${{ c.daily_total | number:'1.0-0' }}</span>
+              <div class="bar-fill" [style.height.%]="(c.daily_total / maxChartValue) * 100"></div>
+              <span class="bar-label">{{ c.day | date:'dd/MM' }}</span>
+            </div>
+          </div>
+          <ng-template #noChart>
+            <div class="no-data">
+              <i class="fas fa-chart-simple"></i>
+              <p>Aún no hay ventas esta semana</p>
+              <p class="hint">Las barras aparecerán cuando registres ventas</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <div class="card card--elevated h-100">
+        <h3 class="card-title"><i class="fas fa-triangle-exclamation warning-text"></i> Bajo stock</h3>
+        <div *ngIf="data.lowStock?.length === 0" class="no-data success-state">
+          <i class="fas fa-circle-check success-text"></i>
+          <p>Stock en niveles óptimos</p>
+          <p class="hint">No hay productos por reponer</p>
+        </div>
+        <div class="table-container" *ngIf="data.lowStock?.length > 0">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Stock</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of data.lowStock">
+                <td>
+                  <div class="row-avatar">
+                    <span class="avatar-circle">{{ p.name?.charAt(0) || '?' }}</span>
+                    {{ p.name }}
+                  </div>
+                </td>
+                <td><strong class="danger-text">{{ p.stock }}</strong> unid.</td>
+                <td>
+                  <span class="badge" [ngClass]="stockBadgeClass(p.stock)">
+                    <i class="fas fa-exclamation-circle" *ngIf="stockLevel(p.stock) !== 'ok'"></i>
+                    {{ stockLabel(p.stock) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </ng-container>
 </div>

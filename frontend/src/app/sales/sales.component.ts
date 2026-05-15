@@ -75,8 +75,8 @@ export class SalesComponent implements OnInit {
     return '🛒';
   }
 
-  getPaymentIcon(method: string) {
-    return method === 'Efectivo' ? '💵' : '🏦';
+  getPaymentIcon(method: string): string {
+    return method === 'Efectivo' ? 'fa-money-bill-wave' : 'fa-credit-card';
   }
 
   registerSale() {

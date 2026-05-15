@@ -1,7 +1,6 @@
 <div class="sales-container">
-  <div class="header-actions">
-    <h2><i class="fas fa-cash-register"></i> Punto de Venta</h2>
-    <p class="subtitle">Diseño rápido, táctil y orientado a cerrar ventas en segundos.</p>
+  <div class="page-intro">
+    <p><i class="fas fa-bolt"></i> Selecciona producto, método de pago y confirma en un toque.</p>
   </div>
 
   <div class="sales-grid">
@@ -54,11 +53,11 @@
 
         <div class="payment-toggle">
           <button type="button" class="toggle-btn" [class.active]="formData.payment_method === 'Efectivo'" (click)="formData.payment_method = 'Efectivo'">
-            <span>💵</span>
+            <i class="fas fa-money-bill-wave"></i>
             Efectivo
           </button>
           <button type="button" class="toggle-btn" [class.active]="formData.payment_method === 'Tarjeta'" (click)="formData.payment_method = 'Tarjeta'">
-            <span>🏦</span>
+            <i class="fas fa-credit-card"></i>
             Transferencia
           </button>
         </div>
@@ -99,7 +98,7 @@
             <div class="sale-right">
               <div class="sale-total">${{ s.total }}</div>
               <span class="badge" [ngClass]="s.payment_method === 'Efectivo' ? 'badge-success' : 'badge-info'">
-                {{ getPaymentIcon(s.payment_method) }} {{ s.payment_method }}
+                <i class="fas" [class]="getPaymentIcon(s.payment_method)"></i> {{ s.payment_method }}
               </span>
             </div>
           </div>
