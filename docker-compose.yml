@@ -17,6 +17,9 @@ services:
       DB_NAME: mf_billar_db
       DB_USER: advanced52m
       DB_PASSWORD: "@Kapobreaking1,"
+      # --- AGREGA ESTO ---
+      extra_hosts: "host.docker.internal:host-gateway"
+      # -------------------
     networks:
       - mf-billar-network
 
