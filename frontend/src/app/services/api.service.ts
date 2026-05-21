@@ -81,6 +81,9 @@ export class ApiService {
   settleFiado(id: number, payment_method = 'Efectivo'): Observable<any> {
     return this.http.post(`${this.apiUrl}/fiados/${id}/settle`, { payment_method });
   }
+  settleFiadoByDebtor(debtor_name: string, payment_method = 'Efectivo'): Observable<any> {
+    return this.http.post(`${this.apiUrl}/fiados/settle-debtor`, { debtor_name, payment_method });
+  }
   deleteFiado(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/fiados/${id}`);
   }

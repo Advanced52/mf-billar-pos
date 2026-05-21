@@ -425,6 +425,55 @@ app.post('/api/fiados/:id/settle', async (req, res) => {
   }
 });
 
+app.post('/api/fiados/settle-debtor', async (req, res) => {
+  const { debtor_name, payment_method } = req.body;
+  const method = payment_method || 'Efectivo';
+
+  if (!debtor_name || !debtor_name.trim()) {
+    return res.status(400).json({ error: 'El nombre del deudor es obligatorio' });
+  }
+
+  try {
+    await db.query('BEGIN');
+
+    // Obtener todos los fiados pendientes de este deudor
+    const pendingFiadosRes = await db.query(
+      "SELECT * FROM fiados WHERE debtor_name = $1 AND status = 'pending'",
+      [debtor_name.trim()]
+    );
+
+    if (pendingFiadosRes.rows.length === 0) {
+      throw new Error('No hay fiados pendientes para este deudor');
+    }
+
+    const settledSales = [];
+    for (const fiado of pendingFiadosRes.rows) {
+      // Crear registro de venta por cada fiado
+      const saleRes = await db.query(
+        `INSERT INTO sales (product_id, quantity, payment_method, total, profit)
+         VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+        [fiado.product_id, fiado.quantity, method, fiado.total, fiado.profit]
+      );
+      settledSales.push(saleRes.rows[0]);
+
+      // Marcar fiado como cobrado
+      await db.query(
+        `UPDATE fiados SET status = 'settled', settled_at = CURRENT_TIMESTAMP WHERE id = $1`,
+        [fiado.id]
+      );
+    }
+
+    await db.query('COMMIT');
+    res.json({ 
+      message: 'Todos los fiados de ' + debtor_name + ' han sido cobrados.', 
+      settledCount: settledSales.length 
+    });
+  } catch (err) {
+    await db.query('ROLLBACK');
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.delete('/api/fiados/:id', async (req, res) => {
   const { id } = req.params;
   try {

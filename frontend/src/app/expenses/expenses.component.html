@@ -126,27 +126,92 @@
           </select>
         </div>
 
-        <div class="fiados-list" *ngIf="fiados.length > 0; else noFiados">
-          <div class="fiado-entry" *ngFor="let f of fiados">
-            <div class="fiado-main">
-              <div class="fiado-icon">{{ getProductIcon(f.product_name) }}</div>
-              <div>
-                <div class="fiado-debtor">{{ f.debtor_name }}</div>
-                <div class="fiado-detail">{{ f.product_name }} × {{ f.quantity }}</div>
-                <div class="fiado-date">{{ f.date | date:'dd/MM/yyyy HH:mm' }}</div>
-              </div>
-              <div class="fiado-amount money">${{ f.total | number:'1.2-2' }}</div>
-            </div>
-            <div class="fiado-actions">
-              <button class="btn btn-success btn-sm" (click)="settleFiado(f)">
-                <i class="fas fa-check"></i> Cobrar
-              </button>
-              <button class="btn btn-ghost btn-sm" (click)="cancelFiado(f)">
-                <i class="fas fa-undo"></i> Cancelar
-              </button>
-            </div>
+        <!-- BUSCADOR DE FIADOS -->
+        <div class="fiados-search-box" *ngIf="fiados.length">
+          <div class="search-input-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="input input-large" placeholder="Buscar por deudor..." [(ngModel)]="fiadosSearchTerm">
+            <button *ngIf="fiadosSearchTerm" class="clear-btn" (click)="fiadosSearchTerm = ''" title="Limpiar búsqueda">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
         </div>
+
+        <!-- SELECTOR DE VISTA -->
+        <div class="fiados-view-toggle" *ngIf="fiados.length">
+          <button type="button" class="toggle-btn" [class.active]="fiadosViewMode === 'individual'" (click)="fiadosViewMode = 'individual'">
+            <i class="fas fa-list-ul"></i> Individuales ({{ filteredFiados.length }})
+          </button>
+          <button type="button" class="toggle-btn" [class.active]="fiadosViewMode === 'debtor'" (click)="fiadosViewMode = 'debtor'">
+            <i class="fas fa-users-viewfinder"></i> Por Deudor ({{ groupedDebtors.length }})
+          </button>
+        </div>
+
+        <!-- LISTA INDIVIDUAL DE FIADOS -->
+        <ng-container *ngIf="fiados.length > 0; else noFiados">
+          <div class="fiados-list" *ngIf="fiadosViewMode === 'individual'">
+            <div class="fiado-entry animate-fade-in" *ngFor="let f of filteredFiados">
+              <div class="fiado-main">
+                <div class="fiado-icon">{{ getProductIcon(f.product_name) }}</div>
+                <div>
+                  <div class="fiado-debtor">{{ f.debtor_name }}</div>
+                  <div class="fiado-detail">{{ f.product_name }} × {{ f.quantity }}</div>
+                  <div class="fiado-date">{{ f.date | date:'dd/MM/yyyy HH:mm' }}</div>
+                  <div class="fiado-note" *ngIf="f.description && !f.description.includes('—') && !f.description.startsWith('Fiado:')">
+                    Nota: {{ f.description }}
+                  </div>
+                </div>
+                <div class="fiado-amount money">${{ f.total | number:'1.2-2' }}</div>
+              </div>
+              <div class="fiado-actions">
+                <button class="btn btn-success btn-sm" (click)="settleFiado(f)">
+                  <i class="fas fa-check"></i> Cobrar
+                </button>
+                <button class="btn btn-ghost btn-sm" (click)="cancelFiado(f)">
+                  <i class="fas fa-undo"></i> Cancelar
+                </button>
+              </div>
+            </div>
+
+            <div class="no-data compact" *ngIf="filteredFiados.length === 0">
+              <i class="fas fa-search"></i>
+              <p>No hay fiados para "{{ fiadosSearchTerm }}"</p>
+            </div>
+          </div>
+
+          <!-- VISTA AGRUPADA POR DEUDOR -->
+          <div class="debtors-list" *ngIf="fiadosViewMode === 'debtor'">
+            <div class="debtor-card animate-fade-in" *ngFor="let g of groupedDebtors">
+              <div class="debtor-main">
+                <div class="debtor-avatar">
+                  <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="debtor-details">
+                  <div class="debtor-name">{{ g.debtor_name }}</div>
+                  <div class="debtor-sub">
+                    <span><i class="fas fa-receipt"></i> {{ g.count }} {{ g.count === 1 ? 'fiado' : 'fiados' }}</span>
+                    <span class="dot-sep">•</span>
+                    <span><i class="far fa-clock"></i> Último: {{ g.last_date | date:'dd/MM' }}</span>
+                  </div>
+                </div>
+                <div class="debtor-total money">${{ g.total | number:'1.2-2' }}</div>
+              </div>
+              <div class="debtor-actions">
+                <button class="btn btn-warning btn-sm" (click)="selectDebtorForDetails(g.debtor_name)">
+                  <i class="fas fa-eye"></i> Ver consumos
+                </button>
+                <button class="btn btn-success btn-sm" (click)="settleAllDebtorFiados(g.debtor_name, g.total, g.count)">
+                  <i class="fas fa-dollar-sign"></i> Cobrar Todo
+                </button>
+              </div>
+            </div>
+
+            <div class="no-data compact" *ngIf="groupedDebtors.length === 0">
+              <i class="fas fa-search"></i>
+              <p>No hay deudores para "{{ fiadosSearchTerm }}"</p>
+            </div>
+          </div>
+        </ng-container>
 
         <ng-template #noFiados>
           <div class="no-data compact">

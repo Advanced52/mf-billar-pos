@@ -32,6 +32,8 @@ export class ExpensesComponent implements OnInit {
   };
 
   settlePayment = 'Efectivo';
+  fiadosSearchTerm = '';
+  fiadosViewMode: 'individual' | 'debtor' = 'individual';
 
   showModal = false;
   editingExpense: any = null;
@@ -75,6 +77,41 @@ export class ExpensesComponent implements OnInit {
 
   get pendingFiadosTotal(): number {
     return this.fiados.reduce((sum, f) => sum + parseFloat(f.total || 0), 0);
+  }
+
+  get filteredFiados(): any[] {
+    const term = (this.fiadosSearchTerm || '').toLowerCase().trim();
+    if (!term) return this.fiados;
+    return this.fiados.filter(f => (f.debtor_name || '').toLowerCase().includes(term));
+  }
+
+  get groupedDebtors(): any[] {
+    const groups: { [key: string]: any } = {};
+    this.fiados.forEach(f => {
+      const name = f.debtor_name || 'Desconocido';
+      if (!groups[name]) {
+        groups[name] = {
+          debtor_name: name,
+          total: 0,
+          count: 0,
+          last_date: f.date,
+          items: []
+        };
+      }
+      groups[name].total += parseFloat(f.total || 0);
+      groups[name].count += 1;
+      groups[name].items.push(f);
+      if (new Date(f.date) > new Date(groups[name].last_date)) {
+        groups[name].last_date = f.date;
+      }
+    });
+
+    const list = Object.values(groups);
+    const term = (this.fiadosSearchTerm || '').toLowerCase().trim();
+    if (term) {
+      return list.filter(g => g.debtor_name.toLowerCase().includes(term));
+    }
+    return list.sort((a: any, b: any) => b.total - a.total);
   }
 
   getProductPrice(): number {
@@ -153,6 +190,24 @@ export class ExpensesComponent implements OnInit {
     if (!confirm(`¿Cancelar fiado de ${fiado.debtor_name}? El stock volverá al inventario.`)) return;
 
     this.api.deleteFiado(fiado.id).subscribe({
+      next: () => {
+        this.loadFiados();
+        this.loadProducts();
+      },
+      error: (err) => alert('Error: ' + (err.error?.error || err.message))
+    });
+  }
+
+  selectDebtorForDetails(name: string) {
+    this.fiadosSearchTerm = name;
+    this.fiadosViewMode = 'individual';
+  }
+
+  settleAllDebtorFiados(debtorName: string, total: number, count: number) {
+    const msg = `¿Cobrar la cuenta completa de ${debtorName} por $${total.toFixed(2)} (${count} fiados pendientes)? Se registrará como ventas y dejará de contar como deuda pendiente.`;
+    if (!confirm(msg)) return;
+
+    this.api.settleFiadoByDebtor(debtorName, this.settlePayment).subscribe({
       next: () => {
         this.loadFiados();
         this.loadProducts();
